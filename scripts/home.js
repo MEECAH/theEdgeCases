@@ -5,6 +5,9 @@ export const homeNavBarPublicRender = function () {
     return `
     <!-- NAVBAR -->
     <nav class=" z-depth-0 white lighten-4" id="navBar">
+        <div id="networks" class="content is-family-sans-serif has-text-weight-medium has-text-white">
+            <p>We have trainned ${numberOfNetworks} networks!!</p>
+        </div>
         <div class="nav-wrapper container">
             <a href="#" class="brand-logo">
                 <img src="img/logo.png" style="width: 50px; height: 50px; margin-top: 5px;">
@@ -17,17 +20,17 @@ export const homeNavBarPublicRender = function () {
                     <a href="#" class="grey-text modal-trigger" data-target="modal-signup">Sign up</a>
                 </li>
             </ul>
-            <br>
-            <div id="networks" class="content is-family-sans-serif has-text-weight-medium has-text-white">
-                <p>We have trainned ${numberOfNetworks} networks!!</p>
-            </div>
         </div>
     </nav>  
     <!-- SIGN UP MODAL -->
     <div id="modal-signup" class="modal">
         <div class="modal-content">
             <h4>Sign up</h4><br />
-            <form id="signup-form">
+            <form id="signup-form">                
+                <div class="input-field">
+                    <input type="text" id="signup-name" required />
+                    <label for="signup-name">Name</label>
+                </div>
                 <div class="input-field">
                     <input type="email" id="signup-email" required />
                     <label for="signup-email">Email address</label>
@@ -108,10 +111,10 @@ export const homeNavBarPrivateRender = function () {
                     <a href="#" class="grey-text modal-trigger" data-target="modal-account">Account</a>
                 </li>
                 <li class="logged-in">
-                    <a href="#" class="grey-text modal-trigger" data-target="modal-create">Create Guide</a>
+                    <a href="#" id="workPlace" class="grey-text">Work Place</a>
                 </li>
                 <li class="logged-in">
-                    <a href="#" id="contactPage" class="grey-text">Contact</a>
+                    <a href="#" id="contactPage" class="grey-text">Contact Us</a>
                 </li>
                 <li class="logged-in">
                     <a href="#" class="grey-text" id="logout">Logout</a>
@@ -154,19 +157,57 @@ export const homeNavBarPrivateRender = function () {
 }
 
 export const homeBodyPrivateRender = function () {
-    console.log("im here in guide list");
+    const $usersList = $(".users");
+
+    db.collection('users').onSnapshot(snapshot => {
+        $usersList.html(snapshot.docs.map(renderUsers));
+    }, err => console.log(err.message));
+
+};
+
+export const userFormat = function () {
+
     return `
-        <!-- GUIDE LIST -->
+        <!-- USER LIST -->
         <div class="container" style="margin-top: 40px;">
-            <ul class="collapsible z-depth-0 guides" style="border: none;">
+            <ul class="collapsible z-depth-0 users" style="border: none;">
             </ul>
         </div>
     `;
 };
 
-export const contactPageRender = function () {
-    //$body.html(contactRender());
-    console.log("in here contact function");
-    return `<div> Contact Page </div>`;
+export const renderUsers = function (doc) {
+
+    if (doc.length < 1) {
+        return ``;
+    }
+    const user = doc.data();
+    return `
+    <div class="card">
+    <div class="card-image">
+      <figure class="image is-128x128">
+        <img src="https://bulma.io/images/placeholders/128x128.png" alt="Placeholder image">
+      </figure>
+    </div>
+    <div class="card-content">
+      <div class="media">
+        <div class="media-left">
+          <figure class="image is-48x48">
+            <img src="https://bulma.io/images/placeholders/96x96.png" alt="Placeholder image">
+          </figure>
+        </div>
+        <div class="media-content">
+          <p class="title is-4">${user.name}</p>
+          <p class="title is-6">${user.email}</p>
+        </div>
+      </div>
+  
+      <div class="content">
+        ${user.bio}
+        <br>
+      </div>
+    </div>
+  </div>  
+    `;
 };
 

@@ -2,12 +2,15 @@ export const handleSignupButton = function (event) {
 
     event.preventDefault();
     const form = event.currentTarget;
+    const name = form['signup-name'].value;
     const email = form['signup-email'].value;
     const password = form['signup-password'].value;
 
     // sign up the user & add firestore data
     auth.createUserWithEmailAndPassword(email, password).then(cred => {
         return db.collection('users').doc(cred.user.uid).set({
+            name: name,
+            email: email,
             bio: form['signup-bio'].value
         });
     }).then(() => {
@@ -22,7 +25,6 @@ export const handleLogoutButton = function (event) {
 
     event.preventDefault();
     auth.signOut().then(() => {
-        alert('User signed out');
     }).catch(err => alert(err));
 };
 

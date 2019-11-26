@@ -28,3 +28,10 @@
   from {left: 300px;}
   to {left: 800px;}
 }
+.columns{
+  margin-top: 5px;
+  margin-bottom: 5px;
+}
+.box{
+  height: 100%;
+}
