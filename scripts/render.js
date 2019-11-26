@@ -1,5 +1,7 @@
 import { handleSignupButton, handleLogoutButton, handleSigninButton, handlerCreateForm } from "./auth.js";
-import { homeNavBarPublicRender, homeBodyPublicRender, numberOfNetworks, homeBodyPrivateRender, homeNavBarPrivateRender, contactPageRender } from "./home.js";
+import { homeNavBarPublicRender, homeBodyPublicRender, numberOfNetworks, homeBodyPrivateRender, homeNavBarPrivateRender, userFormat } from "./home.js";
+import { contactPageRender, simpleNavBar } from "./contact.js";
+import { workPlaceRender } from "./workSpace.js";
 
 export const renderPage = function (user, page) {
 
@@ -52,51 +54,55 @@ export const allUsersInfo = function (user, page) {
     const $createForm = $("#create-form");
     $createForm.on("submit", handlerCreateForm);
 
-    setPage(page);
+    //Setting home page as default when rendering for first time
+    if (page != -1) {
+        setPage(page, user);
+    }
 
     //Home page
-    // const $home = $("#homePage");
-    // $home.on("click", setPage(1));
-
-    //const $contact = $("#contactPage");
-
-    // $contact.on("click", setPage(2));
-    $("#contactPage").click(() => {
-        setPage(2);
-    });
     $("#homePage").click(() => {
-        setPage(1);
+        setPage(1, user);
+    });
+
+    //Contact page    
+    $("#contactPage").click(() => {
+        setPage(2, user);
+    });
+
+    //Work place page
+    $("#workPlace").click(() => {
+        setPage(3, user);
     });
 
 };
 
-
-export const setPage = function (page) {
+export const setPage = function (page, user) {
     const $body = $("#body");
-    console.log($body);
-    console.log(page);
+    const $root = $("#root");
+
     switch (page) {
         //Home page
         case 1:
-            $body.html(homeBodyPrivateRender());
-
-            // setting up guides from data base example
-            const $guideList = $(".guides");
-
-            //getting info from data base test and rendering results
-            db.collection('guides').onSnapshot(snapshot => {
-                $guideList.html(snapshot.docs.map(renderGuides));
-            }, err => console.log(err.message));
+            $root.html(homeNavBarPrivateRender());
+            $body.html(userFormat());
+            homeBodyPrivateRender();
+            allUsersInfo(user, -1);
             break;
+
         //Contact
         case 2:
+            $root.html(simpleNavBar());
             $body.html(contactPageRender());
+            allUsersInfo(user, -1);
+            break;
+
+        //Work place
+        case 3:
+            $root.html(simpleNavBar());
+            workPlaceRender(user);
+            allUsersInfo(user, -1);
             break;
     }
-};
-
-
-export const userPrivateInfo = function () {
 };
 
 export const renderAccountInfo = function ($accountDetails, user) {
@@ -122,42 +128,6 @@ export const renderAccountInfo = function ($accountDetails, user) {
         `;
         $accountDetails.html(html);
     });
-};
-
-export const renderGuides = function (doc) {
-    console.log("Im here in render guides");
-
-    if (doc.length < 1) {
-        return ``;
-    }
-    const guide = doc.data();
-    return `
-    <div class="card">
-    <div class="card-image">
-      <figure class="image is-128x128">
-        <img src="https://bulma.io/images/placeholders/128x128.png" alt="Placeholder image">
-      </figure>
-    </div>
-    <div class="card-content">
-      <div class="media">
-        <div class="media-left">
-          <figure class="image is-48x48">
-            <img src="https://bulma.io/images/placeholders/96x96.png" alt="Placeholder image">
-          </figure>
-        </div>
-        <div class="media-content">
-          <p class="title is-4">${guide.title}</p>
-        </div>
-      </div>
-  
-      <div class="content">
-        ${guide.content}
-        <br>
-        <time datetime="2016-1-1">11:09 PM - 1 Jan 2016</time>
-      </div>
-    </div>
-  </div>
-    `;
 };
 
 export const loadPageIntoDOM = async function () {
