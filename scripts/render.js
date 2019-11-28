@@ -1,14 +1,12 @@
-import { handleSignupButton, handleLogoutButton, handleSigninButton, handlerCreateForm } from "./auth.js";
-import { homeNavBarPublicRender, homeBodyPublicRender, numberOfNetworks, homeBodyPrivateRender, homeNavBarPrivateRender, userFormat } from "./home.js";
+import { handleSignupButton, handleLogoutButton, handleSigninButton } from "./auth.js";
+import { homeNavBarPublicRender, homeBodyPublicRender, homeBodyPrivateRender, homeNavBarPrivateRender, userFormat } from "./home.js";
 import { contactPageRender, simpleNavBar } from "./contact.js";
-import { workPlaceRender } from "./workSpace.js";
+import { workPlaceRender, numberOfNetworks } from "./workSpace.js";
 
 export const renderPage = function (user, page) {
 
     if (user) {
         allUsersInfo(user, page);
-        //Check for user id and display user private info
-        // userPrivateInfo(user);
     } else {
         publicInfo();
     }
@@ -47,12 +45,7 @@ export const allUsersInfo = function (user, page) {
     $logout.on("click", handleLogoutButton);
 
     //User account info
-    const $accountDetails = $(".account-details");
-    renderAccountInfo($accountDetails, user);
-
-    //creating new guides and storing them in the data base
-    const $createForm = $("#create-form");
-    $createForm.on("submit", handlerCreateForm);
+    renderAccountInfo(user);
 
     //Setting home page as default when rendering for first time
     if (page != -1) {
@@ -79,6 +72,7 @@ export const allUsersInfo = function (user, page) {
 export const setPage = function (page, user) {
     const $body = $("#body");
     const $root = $("#root");
+    let networkCount = numberOfNetworks(user);
 
     switch (page) {
         //Home page
@@ -91,25 +85,27 @@ export const setPage = function (page, user) {
 
         //Contact
         case 2:
-            $root.html(simpleNavBar());
+            $root.html(simpleNavBar(networkCount));
             $body.html(contactPageRender());
             allUsersInfo(user, -1);
             break;
 
         //Work place
         case 3:
-            $root.html(simpleNavBar());
+            $root.html(simpleNavBar(networkCount));
             workPlaceRender(user);
             allUsersInfo(user, -1);
             break;
     }
 };
 
-export const renderAccountInfo = function ($accountDetails, user) {
+export const renderAccountInfo = function (user) {
     // account info
+    const $accountDetails = $(".account-details");
+
     db.collection('users').doc(user.uid).get().then(doc => {
         const html = `
-            <div class="card">  
+            <div class="card" id="userAcc">  
                 <div class="card-content">
                     <div class="media">
                         <div class="media-left">
@@ -119,18 +115,102 @@ export const renderAccountInfo = function ($accountDetails, user) {
                         </div>
                         <div class="media-content">
                             <p class="title is-4">${user.email}</p>
+                        </div>                        
+                    </div>
+                    <div class="media-content">
+                            <p class="subtitle is-6"> ${doc.data().bio}</p>
+                    </div>
+                    <br>                    
+                    <a href="#" id="editUser" data-id="${user.uid}" class="card-footer-item modal-trigger btn yellow darken-2 z-depth-0" data-target="modal-userEdit">Edit</a>
+                </div>
+            </div>
+
+            <!-- EDIT MODAL -->
+            <div class="modal" id="modal-userEdit" >
+                <div class="modal-content">
+                    <br>
+                    <p class="subtitle is-4">Edit Account</p>
+                    <form id="edit-userForm">                
+                        <div class="input-field">
+                            <input type="text" id="edit-name">
+                            <label for="edit-name">Name</label>
                         </div>
-                    </div>
-                    <div class="content"> ${doc.data().bio}
-                    </div>
+                        <div class="input-field">
+                            <input type="text" id="edit-bio">
+                            <label for="edit-bio">Edit bio</label>
+                        </div>
+                        <br>
+                        <div class="file has-name is-fullwidth">
+                            <label class="file-label">
+                                <input class="file-input" type="file" value="upload" id="pic">
+                                <span class="file-cta">
+                                    <span class="file-icon">
+                                        <i class="fas fa-upload"></i>
+                                    </span>
+                                    <span class="file-label">
+                                        Choose a pic…
+                                    </span>
+                                </span>
+                                <span class="file-name">
+                                </span>
+                            </label>
+                        </div>
+                        <br>
+                        <button id="saveUserButton" class="btn yellow darken-2 z-depth-0">Save</button>
+                    </form>
                 </div>
             </div>
         `;
         $accountDetails.html(html);
+    }).then(() => {
+        let modals = document.querySelectorAll('.modal');
+        M.Modal.init(modals);
+        let $editUserForm = $("#edit-userForm");
+
+        // Save changes
+        $editUserForm.submit(() => handleEditUserButton(event, user));
     });
 };
 
-export const loadPageIntoDOM = async function () {
+export const handleEditUserButton = function (event, user) {
+    event.preventDefault();
+
+    const form = event.currentTarget;
+    const name = form['edit-name'].value;
+    const bio = form['edit-bio'].value;
+    let picButton = form['pic'];
+
+    //TO DO!!!
+    //Uploading images
+    // picButton.addEventListener('change', function (e) {
+    //     console.log("here");
+    //     let file = e.target.files[0];
+    //     let storageRef = storage.ref('users/images/' + file.name);
+    //     let task = storageRef.put(file).then(function(snapshot) {
+    //     console.log('Uploaded a blob or file!');
+    // });
+
+    //     File name is 'space.jpg'
+    // let name = storageRef.name;
+    // });
+
+    let userName;
+    let userBio;
+
+    db.collection('users').doc(user.uid).get().then(doc => {
+        userName = doc.data().name;
+        userBio = doc.data().bio;
+    }).then(() => {
+        db.collection('users').doc(user.uid).update({
+            name: (name.length > 0) ? name : userName,
+            bio: (bio.length > 0) ? bio : userBio,
+        }).then(() => {
+            renderAccountInfo(user);
+        });
+    });
+};
+
+export const loadPageIntoDOM = function () {
 
     const $root = $("#root");
 
@@ -147,6 +227,7 @@ export const loadPageIntoDOM = async function () {
         }
     });
 
+    //TO DO !!!!!!!
     // Nav bar sticky
     /*
     window.onscroll = function () { myFunction() };

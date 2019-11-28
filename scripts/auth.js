@@ -11,7 +11,8 @@ export const handleSignupButton = function (event) {
         return db.collection('users').doc(cred.user.uid).set({
             name: name,
             email: email,
-            bio: form['signup-bio'].value
+            bio: form['signup-bio'].value,
+            pic: "",
         });
     }).then(() => {
         // close the signup modal & reset form
@@ -45,19 +46,3 @@ export const handleSigninButton = function (event) {
     }).catch(err => alert(err.message));
 };
 
-export const handlerCreateForm = function (event) {
-
-    event.preventDefault();
-    const form = event.currentTarget;
-    db.collection('guides').add({
-        title: form.title.value,
-        content: form.content.value
-    }).then(() => {
-        // close the create modal & reset form
-        const modal = document.querySelector('#modal-create');
-        M.Modal.getInstance(modal).close();
-        form.reset();
-    }).catch(err => {
-        alert(err.message);
-    });
-};

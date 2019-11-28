@@ -1,11 +1,10 @@
-export const simpleNavBar = function () {
-    let numberOfNetworks = 0;
+export const simpleNavBar = function (networkCount) {
 
     return `    
     <!-- NAVBAR -->
     <nav class=" z-depth-0 white lighten-4" id="navBar">
         <div id="networks" class="content is-family-sans-serif has-text-weight-medium has-text-white">
-            <p>We have trainned ${numberOfNetworks} networks!!</p>
+            <p>We have trainned ${networkCount} networks!!</p>
         </div>
         <div class="nav-wrapper container">
             <a href="#" class="brand-logo">
@@ -29,33 +28,17 @@ export const simpleNavBar = function () {
                 </li>
             </ul>            
         </div>
-    </nav>  
+    </nav>
 
     <!-- ACCOUNT MODAL -->
     <div id="modal-account" class="modal">
         <div class="modal-content center-align">
-            <h4>Account details</h4><br />
+            <br>
+            <p class="subtitle is-4">Account Details</p> 
+            <br>           
             <div class="account-details"></div>
         </div>
     </div>
-  
-    <!-- CREATE GUIDE MODAL -->
-    <div id="modal-create" class="modal">
-        <div class="modal-content">
-            <h4>Create Guide</h4><br />
-            <form id="create-form">
-                <div class="input-field">
-                    <input type="text" id="title" required>
-                    <label for="title">Guide Title</label>
-                </div>
-                <div class="input-field">
-                    <textarea id="content" class="materialize-textarea" required></textarea>
-                    <label for="content">Guide Content</label>
-                </div>
-                <button class="btn yellow darken-2 z-depth-0">Create</button>
-            </form>
-        </div>
-    </div>    
 `;
 };
 

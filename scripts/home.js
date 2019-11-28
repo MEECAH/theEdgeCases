@@ -25,7 +25,8 @@ export const homeNavBarPublicRender = function () {
     <!-- SIGN UP MODAL -->
     <div id="modal-signup" class="modal">
         <div class="modal-content">
-            <h4>Sign up</h4><br />
+            <br>
+            <p class="subtitle is-4">Sign Up</p>
             <form id="signup-form">                
                 <div class="input-field">
                     <input type="text" id="signup-name" required />
@@ -51,7 +52,8 @@ export const homeNavBarPublicRender = function () {
     <!-- LOGIN MODAL -->
     <div id="modal-login" class="modal">
         <div class="modal-content">
-            <h4>Login</h4><br />
+            <br>
+            <p class="subtitle is-4">Log in</p>
             <form id="login-form">
                 <div class="input-field">
                     <input type="email" id="login-email" required />
@@ -78,20 +80,15 @@ export const homeBodyPublicRender = function () {
                 <img src="img/laptop1.jpg" alt="Placeholder image" style="width: 500px; height: 300px; margin-top: 50px">
             </figure>
         </div>
-        <div class="card-content">
+        <div class="card-content container is-widescreen">
             <div class="content has-text-centered is-family-sans-serif has-text-weight-medium has-text-grey-dark is-size-3">
-                Harness the power of machine learning for your application needs. 
-                Just configure the kind of network you want, we will do the rest.
+                <p class="subtitle is-4 notification"> Harness the power of machine learning for your application needs. 
+                Just configure the kind of network you want, we will do the rest.</p>
                 <br>
             </div>            
         </div>
     </div>
     `;
-};
-
-//TO DO
-export const numberOfNetworks = function () {
-
 };
 
 export const homeNavBarPrivateRender = function () {
@@ -131,28 +128,12 @@ export const homeNavBarPrivateRender = function () {
     <!-- ACCOUNT MODAL -->
     <div id="modal-account" class="modal">
         <div class="modal-content center-align">
-            <h4>Account details</h4><br />
+            <br>
+            <p class="subtitle is-4">Account Details</p> 
+            <br>
             <div class="account-details"></div>
         </div>
-    </div>
-  
-    <!-- CREATE GUIDE MODAL -->
-    <div id="modal-create" class="modal">
-        <div class="modal-content">
-            <h4>Create Guide</h4><br />
-            <form id="create-form">
-                <div class="input-field">
-                    <input type="text" id="title" required>
-                    <label for="title">Guide Title</label>
-                </div>
-                <div class="input-field">
-                    <textarea id="content" class="materialize-textarea" required></textarea>
-                    <label for="content">Guide Content</label>
-                </div>
-                <button class="btn yellow darken-2 z-depth-0">Create</button>
-            </form>
-        </div>
-    </div>    
+    </div>   
 `;
 }
 
@@ -170,7 +151,7 @@ export const userFormat = function () {
     return `
         <!-- USER LIST -->
         <div class="container" style="margin-top: 40px;">
-            <ul class="collapsible z-depth-0 users" style="border: none;">
+            <ul class="users">
             </ul>
         </div>
     `;
@@ -181,7 +162,8 @@ export const renderUsers = function (doc) {
     if (doc.length < 1) {
         return ``;
     }
-    const user = doc.data();
+    const currUser = doc.data();
+
     return `
     <div class="card">
     <div class="card-image">
@@ -197,17 +179,19 @@ export const renderUsers = function (doc) {
           </figure>
         </div>
         <div class="media-content">
-          <p class="title is-4">${user.name}</p>
-          <p class="title is-6">${user.email}</p>
+          <p class="title is-4">${currUser.name}</p>
+          <p class="title is-6">${currUser.email}</p>
         </div>
       </div>
   
       <div class="content">
-        ${user.bio}
+        ${currUser.bio}
         <br>
       </div>
     </div>
   </div>  
     `;
 };
+
+
 
