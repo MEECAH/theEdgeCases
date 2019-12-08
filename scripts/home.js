@@ -118,9 +118,9 @@ export const homeNavBarPrivateRender = function () {
                 </li>
             </ul>
             <div class="search-container">
-                <form action="/action_page.php">
-                    <input type="text" placeholder="Search.." name="search">
-                </form>
+            <form action="/action_page.php">
+                <input type="text" id="searchBarID" placeholder="Search.." name="search">
+            </form>
             </div>
         </div>
     </nav>  
@@ -134,6 +134,26 @@ export const homeNavBarPrivateRender = function () {
             <div class="account-details"></div>
         </div>
     </div>   
+    <script>
+    $('#searchBarID').autocomplete({
+        source: function(request,response) { 
+            let names = [];
+            let ids = [];
+            let users = [];
+            db.collection('users').get().then(users => {
+                for(let i = 0; i<users.docs.length; i++){
+                    names[i] = users.docs[i].data().name;
+                    ids[i] = users.docs[i].id;
+                    users[i]={name: names[i], id: ids[i]};
+                }
+                let result = [];
+                console.log(request.term);
+                result = names.filter(name => name.toLowerCase().includes(request.term.toLowerCase()));
+                response(result);
+            })
+            }
+        },{})
+    </script>
 `;
 }
 
