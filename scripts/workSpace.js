@@ -53,12 +53,15 @@ export const workPlaceRender = function (user) {
     $("#atv_label").click(() => toggleModal(event, '#atv_modal', true));
     // what is learning rate?
     $("#lrn_label").click(() => toggleModal(event, '#lrn_modal', true));
+    // what is nodes per layer?
+    $("#npl_label").click(() => toggleModal(event, '#npl_modal', true));
 
     // delete em
     $("#del_epc_modal").click(() => toggleModal(event, '#epc_modal', false));
     $("#del_hid_modal").click(() => toggleModal(event, '#hid_modal', false));
     $("#del_atv_modal").click(() => toggleModal(event, '#atv_modal', false));
     $("#del_lrn_modal").click(() => toggleModal(event, '#lrn_modal', false));
+    $("#del_npl_modal").click(() => toggleModal(event, '#npl_modal', false));
 
 }
 
@@ -211,7 +214,27 @@ export const renderCreateNetworksArea = function () {
                         <section class="modal-card-body">
                             <div class="content">
                             <h1>What are hidden layers?</h1>
-                            <p>The number of hidden layers is the number of layers of neurons in a network between the input and the output. More layers could lead to greater accuracy but will it will take a longer amount of time to train the neural network. Four layers is usually plenty but feel free to experiment!</p>
+                            <p>The number of hidden layers is the number of layers of neurons in a network between the input and the output. More layers could lead to greater accuracy but the network will require a longer amount of time to train. Four layers is usually plenty but feel free to experiment!</p>
+                            </div>
+                        </section>
+                        </div>
+
+                    </div><div class="field">
+                        <label class="label" id="npl_label">Nodes Per Layer</label>
+                        <div class="control">
+                            <input class="input" type="number" placeholder="4" required/>
+                        </div>
+                    </div>                
+                    <div id="#npl_modal" class="modal">
+                        <div class="modal-background"></div>
+                        <div class="modal-card">
+                        <header class="modal-card-head">
+                            <button id="del_npl_modal" class="delete" aria-label="close"></button>
+                        </header>
+                        <section class="modal-card-body">
+                            <div class="content">
+                            <h1>What is nodes per layer?</h1>
+                            <p>Nodes per layer is the number of nodes that each layer in a neural network has! More nodes could lead to greater accuracy but the network may require a longer amount of time to train. Four nodes is usually plenty but feel free to experiment!</p>
                             </div>
                         </section>
                         </div>
