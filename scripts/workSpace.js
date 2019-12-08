@@ -43,7 +43,38 @@ export const workPlaceRender = function (user) {
     // clear
     const $clear = $("#clear");
     $clear.click(() => handleClearButton(event));
+
+
+    // what is an epoc?
+    $("#epc_label").click(() => toggleModal(event, '#epc_modal', true));
+    // what are hidden layers?
+    $("#hid_label").click(() => toggleModal(event, '#hid_modal', true));
+    // what is an activation function?
+    $("#atv_label").click(() => toggleModal(event, '#atv_modal', true));
+    // what is learning rate?
+    $("#lrn_label").click(() => toggleModal(event, '#lrn_modal', true));
+    // what is nodes per layer?
+    $("#npl_label").click(() => toggleModal(event, '#npl_modal', true));
+
+    // delete em
+    $("#del_epc_modal").click(() => toggleModal(event, '#epc_modal', false));
+    $("#del_hid_modal").click(() => toggleModal(event, '#hid_modal', false));
+    $("#del_atv_modal").click(() => toggleModal(event, '#atv_modal', false));
+    $("#del_lrn_modal").click(() => toggleModal(event, '#lrn_modal', false));
+    $("#del_npl_modal").click(() => toggleModal(event, '#npl_modal', false));
+
 }
+
+// toggle a modal
+export const toggleModal = function (event, modalID, turnOn) {
+    event.preventDefault;
+    if (turnOn){
+        document.getElementById(modalID).className += " is-active";
+    } else {
+        document.getElementById(modalID).className = "modal";
+    }
+}
+
 
 //Deleting networks from firestore
 export const handleDeleteButton = function (user, network) {
@@ -114,6 +145,7 @@ export const renderCreateNetworksArea = function () {
         <div class="column">
             <div class="box">
                 <form id="network-form">
+                    
                     <div class="field">
                         <label class="label">Title</label>
                         <div class="control">
@@ -122,36 +154,139 @@ export const renderCreateNetworksArea = function () {
                     </div>
 
                     <div class="field">
-                        <label class="label">To check</label>
+                        <label class="label" id="lrn_label" >Learning Rate</label>
                         <div class="control">
-                            <input class="input" type="text" placeholder="Enter text" required/>
-                        </div>
-                    </div>                
-          
-                    <div class="field">
-                        <label class="label">Subject</label>
-                        <div class="control">
-                             <div class="select">
-                                <select>
-                                    <option>Select dropdown</option>
-                                    <option>With options</option>
-                                </select>
+                            <div class="select">
+                                <div class="control">
+                                    <input class="input" type="number" step=".01" min="0" max="1" placeholder=".05" required/>
+                                </div>
                             </div>
+                        </div>
+                    </div>
+                    <div id="#lrn_modal" class="modal">
+                        <div class="modal-background"></div>
+                        <div class="modal-card">
+                        <header class="modal-card-head">
+                            <button id="del_lrn_modal" class="delete" aria-label="close"></button>
+                        </header>
+                        <section class="modal-card-body">
+                            <div class="content">
+                            <h1>What is learning rate?</h1>
+                            <p>A network’s learning rate is how much that neural network changes each time it trains. A higher learning rate could make a network train faster but it may not be as accurate/precise. .5 is a good learning rate for most networks.</p>
+                            </div>
+                        </section>
                         </div>
                     </div>
 
                     <div class="field">
-                        <label class="label">Subject2</label>
+                        <label class="label" id="epc_label">Epocs</label>
+                        <div class="control">
+                            <input class="input" type="number" placeholder="30" required/>
+                        </div>
+                    </div>                
+                    <div id="#epc_modal" class="modal">
+                        <div class="modal-background"></div>
+                        <div class="modal-card">
+                        <header class="modal-card-head">
+                            <button id="del_epc_modal" class="delete" aria-label="close"></button>
+                        </header>
+                        <section class="modal-card-body">
+                            <div class="content">
+                            <h1>What is an epoc?</h1>
+                            <p>The number of epochs is the number of times that a neural network trains on a given data set. More epochs could lead to greater accuracy but will it will take a longer amount of time to train the neural network. 30 is a good number of epochs for training most neural networks.</p>
+                            </div>
+                        </section>
+                        </div>
+                    </div>
+
+                    <div class="field">
+                        <label class="label" id="hid_label">Hidden Layers</label>
+                        <div class="control">
+                            <input class="input" type="number" placeholder="4" required/>
+                        </div>
+                    </div>                
+                    <div id="#hid_modal" class="modal">
+                        <div class="modal-background"></div>
+                        <div class="modal-card">
+                        <header class="modal-card-head">
+                            <button id="del_hid_modal" class="delete" aria-label="close"></button>
+                        </header>
+                        <section class="modal-card-body">
+                            <div class="content">
+                            <h1>What are hidden layers?</h1>
+                            <p>The number of hidden layers is the number of layers of neurons in a network between the input and the output. More layers could lead to greater accuracy but the network will require a longer amount of time to train. Four layers is usually plenty but feel free to experiment!</p>
+                            </div>
+                        </section>
+                        </div>
+
+                    </div><div class="field">
+                        <label class="label" id="npl_label">Nodes Per Layer</label>
+                        <div class="control">
+                            <input class="input" type="number" placeholder="4" required/>
+                        </div>
+                    </div>                
+                    <div id="#npl_modal" class="modal">
+                        <div class="modal-background"></div>
+                        <div class="modal-card">
+                        <header class="modal-card-head">
+                            <button id="del_npl_modal" class="delete" aria-label="close"></button>
+                        </header>
+                        <section class="modal-card-body">
+                            <div class="content">
+                            <h1>What is nodes per layer?</h1>
+                            <p>Nodes per layer is the number of nodes that each layer in a neural network has! More nodes could lead to greater accuracy but the network may require a longer amount of time to train. Four nodes is usually plenty but feel free to experiment!</p>
+                            </div>
+                        </section>
+                        </div>
+                    </div>
+
+                    <div class="field">
+                        <label class="label" id="atv_label" >Activation Function</label>
                         <div class="control">
                             <div class="select">
-                                <select>
-                                    <option>Select dropdown</option>
-                                    <option>With options</option>
+                                <select id="activation_function">
+                                    <option>Sigmoid</option>
+                                    <option>Tanh</option>
+                                    <option>Relu</option>
+                                    <option>Leaky Relu</option>
                                 </select>
                             </div>
                         </div>
                     </div>
-          
+                    <div id="#atv_modal" class="modal">
+                        <div class="modal-background"></div>
+                        <div class="modal-card">
+                        <header class="modal-card-head">
+                            <button id="del_atv_modal" class="delete" aria-label="close"></button>
+                        </header>
+                        <section class="modal-card-body">
+                            <div class="content">
+                            <h1>What is an activation function?</h1>
+                            <p>Each neuron has something called an activation function. An activation function looks at an input value given to Neuron A and decides whether Neuron A should activate- and by how much.</p>
+
+                            <img src="img/Activation Function Pics/Step.png" alt="Smiley face" style="height:100; width:100">
+
+                            <p>The simplest activation function is called a “step” function (pictured above). If the value is given to Neuron A meets a certain criteria (for example, if value is >= 5) than Neuron A fires at 100%. Otherwise, Neuron A does not fire at all. The problem with this activation function is that it does not allow for nuance. Two blue pixels, for example, might not be the same shade of blue. A step activation function could tell you that a pixel was blue but a different activation function could better capture just how blue.</p>
+                            <p>This website allows for the use of four common activation functions that solve this problem:  Sigmoid, Tanh, Relu and Leaky Relu. Activation functions should be chosen based on whether the shape of the function approximates that of the problem you are trying to solve. However, if you don’t enjoy math, guess and check is also a great strategy.</p>
+                            <p>HINT: For binary classification using a neural network (what this website does), Sigmoid and Tanh will likely work the best as they approximate the shape of the binary “step” function.</p>
+                            
+                            <h2>Sigmoid Function:</h2>
+                            <img src="img/Activation Function Pics/Sigmoid.png" alt="Smiley face" style="height:80; width:80">
+
+                            <h2>Tanh Function:</h2>
+                            <img src="img/Activation Function Pics/Tanh.jpg" alt="Smiley face" style="height:80; width:80">
+
+                            <h2>Relu Function:</h2>
+                            <img src="img/Activation Function Pics/Relu.png" alt="Smiley face" style="height:80; width:80">
+
+                            <h2>Leaky Relu Function:</h2>
+                            <img src="img/Activation Function Pics/Leaky Relu.jpg" alt="Smiley face" style="height:80; width:80">
+
+                            </div>
+                        </section>
+                        </div>
+                    </div>
+
                     <div class="field">
                         <label class="label">Short Description</label>
                         <div class="control">
