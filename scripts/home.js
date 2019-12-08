@@ -117,10 +117,11 @@ export const homeNavBarPrivateRender = function () {
                     <a href="#" class="grey-text" id="logout">Logout</a>
                 </li>
             </ul>
-            <div id="searchBarDiv">
-                        <label>Search Heroes</label>
-                        <input type="text" id="searchBarID">
-                    </div>
+            <div class="search-container">
+            <form action="/action_page.php">
+                <input type="text" id="searchBarID" placeholder="Search.." name="search">
+            </form>
+            </div>
         </div>
     </nav>  
 
@@ -211,6 +212,3 @@ export const renderUsers = function (doc) {
   </div>  
     `;
 };
-
-
-
