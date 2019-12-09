@@ -8,6 +8,13 @@ export const handleSignupButton = function (event) {
 
     // sign up the user & add firestore data
     auth.createUserWithEmailAndPassword(email, password).then(cred => {
+        //creating likes collection for user
+        let arrLikes = [];
+        db.collection('likes').doc(cred.user.uid).set({
+            liked: arrLikes,
+            likesCount: 0,
+        });
+        //adding user at user collection
         return db.collection('users').doc(cred.user.uid).set({
             name: name,
             email: email,

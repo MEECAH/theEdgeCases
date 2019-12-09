@@ -79,7 +79,7 @@ export const setPage = function (page, user) {
         case 1:
             $root.html(homeNavBarPrivateRender());
             $body.html(userFormat());
-            homeBodyPrivateRender();
+            homeBodyPrivateRender(user);
             allUsersInfo(user, -1);
             break;
 
@@ -104,6 +104,7 @@ export const renderAccountInfo = function (user) {
     const $accountDetails = $(".account-details");
 
     db.collection('users').doc(user.uid).get().then(doc => {
+
         const html = `
             <div class="card" id="userAcc">  
                 <div class="card-content">
@@ -128,7 +129,6 @@ export const renderAccountInfo = function (user) {
             <!-- EDIT MODAL -->
             <div class="modal" id="modal-userEdit" >
                 <div class="modal-content">
-                    <br>
                     <p class="subtitle is-4">Edit Account</p>
                     <form id="edit-userForm">                
                         <div class="input-field">
@@ -156,6 +156,9 @@ export const renderAccountInfo = function (user) {
                             </label>
                         </div>
                         <br>
+                        <div class="columns is-mobile is-multiline is-centered">
+                            <div class="loader" style="display: none"></div>
+                        </div>
                         <button id="saveUserButton" class="btn yellow darken-2 z-depth-0">Save</button>
                     </form>
                 </div>
@@ -166,46 +169,94 @@ export const renderAccountInfo = function (user) {
         let modals = document.querySelectorAll('.modal');
         M.Modal.init(modals);
         let $editUserForm = $("#edit-userForm");
+        let file = "";
+
+        //Uploading pic
+        $editUserForm.on("change", "#pic", () => {
+            file = event.target.files[0];
+            let $name = $(".file-name");
+            $name.html(file.name);
+        });
 
         // Save changes
-        $editUserForm.submit(() => handleEditUserButton(event, user));
+        $editUserForm.submit(() => handleEditUserButton(event, user, file));
     });
 };
 
-export const handleEditUserButton = function (event, user) {
+export const handleEditUserButton = function (event, user, file) {
     event.preventDefault();
 
     const form = event.currentTarget;
     const name = form['edit-name'].value;
     const bio = form['edit-bio'].value;
-    let picButton = form['pic'];
-
-    //TO DO!!!
-    //Uploading images
-    // picButton.addEventListener('change', function (e) {
-    //     console.log("here");
-    //     let file = e.target.files[0];
-    //     let storageRef = storage.ref('users/images/' + file.name);
-    //     let task = storageRef.put(file).then(function(snapshot) {
-    //     console.log('Uploaded a blob or file!');
-    // });
-
-    //     File name is 'space.jpg'
-    // let name = storageRef.name;
-    // });
-
+    const loader = $(".loader");
     let userName;
     let userBio;
+    let newPic = "";
 
-    db.collection('users').doc(user.uid).get().then(doc => {
-        userName = doc.data().name;
-        userBio = doc.data().bio;
-    }).then(() => {
-        db.collection('users').doc(user.uid).update({
-            name: (name.length > 0) ? name : userName,
-            bio: (bio.length > 0) ? bio : userBio,
+    //No file updated
+    if (file.length <= 0) {
+        db.collection('users').doc(user.uid).get().then(doc => {
+            userName = doc.data().name;
+            userBio = doc.data().bio;
         }).then(() => {
-            renderAccountInfo(user);
+            db.collection('users').doc(user.uid).update({
+                name: (name.length > 0) ? name : userName,
+                bio: (bio.length > 0) ? bio : userBio,
+            }).then(() => {
+                renderAccountInfo(user);
+            });
+        });
+        return;
+    }
+
+    //File updated
+    let storageRef = storage.ref('users/images/' + file.name);
+    let task = storageRef.put(file);
+
+    task.on('state_changed', function (snapshot) {
+
+        // Get task progress, including the number of bytes uploaded and the total number of bytes to be uploaded
+        let progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+
+        switch (snapshot.state) {
+            case firebase.storage.TaskState.PAUSED: // or 'paused'
+                alert('Upload is paused');
+                break;
+            case firebase.storage.TaskState.RUNNING: // or 'running'
+                loader.show();
+                break;
+        }
+    }, function (error) {
+        switch (error.code) {
+            case 'storage/unauthorized':
+                alert("Unauthorized");
+                break;
+            case 'storage/canceled':
+                alert("Canceled");
+                break;
+            case 'storage/unknown':
+                alert("Unknown");
+                break;
+        }
+    }, function () {
+        // Upload completed successfully, now we can get the download URL
+        task.snapshot.ref.getDownloadURL().then(function (downloadURL) {
+            newPic = downloadURL;
+
+            db.collection('users').doc(user.uid).get().then(doc => {
+                userName = doc.data().name;
+                userBio = doc.data().bio;
+            }).then(() => {
+                db.collection('users').doc(user.uid).update({
+                    name: (name.length > 0) ? name : userName,
+                    bio: (bio.length > 0) ? bio : userBio,
+                    pic: newPic,
+                }).then(() => {
+                    loader.hide();
+                    renderAccountInfo(user);
+                });
+            });
         });
     });
 };
