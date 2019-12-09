@@ -1,5 +1,5 @@
 import { handleSignupButton, handleLogoutButton, handleSigninButton } from "./auth.js";
-import { homeNavBarPublicRender, homeBodyPublicRender, homeBodyPrivateRender, homeNavBarPrivateRender, userFormat } from "./home.js";
+import { homeNavBarPublicRender, homeBodyPublicRender, homeBodyPrivateRender, homeNavBarPrivateRender, userFormat, homeBodyPrivateSearchRender } from "./home.js";
 import { contactPageRender, simpleNavBar } from "./contact.js";
 import { workPlaceRender, numberOfNetworks } from "./workSpace.js";
 
@@ -55,6 +55,17 @@ export const allUsersInfo = function (user, page) {
     //Home page
     $("#homePage").click(() => {
         setPage(1, user);
+    });
+
+    $("#searchBarID").unbind('keypress').bind('keypress', function (e) {
+        
+        if(e.which === 13) {
+
+            e.preventDefault();
+            e.stopPropagation();
+
+            handleSearchEnter(user);
+        }
     });
 
     //Contact page    
@@ -260,6 +271,15 @@ export const handleEditUserButton = function (event, user, file) {
         });
     });
 };
+
+export const handleSearchEnter = function(user) {
+
+    let criteria = $("#searchBarID").val();
+
+    //console.log("this is the search critera: "+criteria);
+
+    homeBodyPrivateSearchRender(criteria, user);
+}
 
 export const loadPageIntoDOM = function () {
 

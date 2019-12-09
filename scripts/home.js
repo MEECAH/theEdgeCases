@@ -119,7 +119,7 @@ export const homeNavBarPrivateRender = function () {
             </ul>
             <div class="search-container">
             <form action="/action_page.php">
-                <input type="text" id="searchBarID" placeholder="Search.." name="search">
+                <input type="text" id="searchBarID" placeholder="Search Users.." name="search">
             </form>
             </div>
         </div>
@@ -168,6 +168,36 @@ export const homeBodyPrivateRender = function (user) {
         });
 
     }, err => console.log(err.message));
+};
+
+export const homeBodyPrivateSearchRender = function (criteria, user) {
+    const $usersList = $(".users");
+
+    let names = [];
+    let ids = [];
+    let userObjects = [];
+    let resultObjects = [];
+    let profiles = [];
+    db.collection('users').get().then(users => {
+        for(let i = 0; i<users.docs.length; i++){
+            names[i] = users.docs[i].data().name;
+            ids[i] = users.docs[i].id;
+            userObjects[i] = {name: names[i], id: ids[i]};
+        }
+        resultObjects = userObjects.filter(particularUser => particularUser['name'].toLowerCase().includes(criteria.toLowerCase()));
+    }).then(()=>{
+        for(let i = 0; i<resultObjects.length; i++){
+            db.collection('users').doc(resultObjects[i].id).get().then(users =>{
+                profiles[i] = users;
+            })
+            }
+        setTimeout(function(){
+            $usersList.html(profiles.map(renderUsers(user)));
+         }, 300);
+        
+    })
+
+
 };
 
 export const handleLikeButton = function (event, user) {
@@ -229,8 +259,8 @@ export const userFormat = function () {
 
 export const renderUsers = function (user) {
 
-    return function (doc) {
-
+     return function (doc) {
+        
         if (doc.length < 1) {
             return ``;
         }
