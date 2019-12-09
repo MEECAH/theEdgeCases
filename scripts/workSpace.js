@@ -1,5 +1,19 @@
 
+
 let $editForm;
+
+var createArray = function(data) {	
+    if(data !== null && data !== "" && data.length > 1) {
+        this.data = data;
+        StatsProcessor(data);
+        $("#statOutPut").removeClass( "hidden" );			
+        $("#errorOutPut").addClass( "hidden" );			
+    } else {
+        $("#errorOutPut").removeClass( "hidden" );
+        $("#statOutPut").addClass( "hidden" );
+        $("#errorOutPut li").html('There is no data to import');	
+    }	
+};
 
 export const workPlaceRender = function (user) {
     let modals;
@@ -56,6 +70,8 @@ export const workPlaceRender = function (user) {
     // what is nodes per layer?
     $("#npl_label").click(() => toggleModal(event, '#npl_modal', true));
 
+    $("#format_label").click(() => toggleModal(event, '#format_modal', true));
+
     // delete em
     $("#del_epc_modal").click(() => toggleModal(event, '#epc_modal', false));
     $("#del_hid_modal").click(() => toggleModal(event, '#hid_modal', false));
@@ -63,6 +79,21 @@ export const workPlaceRender = function (user) {
     $("#del_lrn_modal").click(() => toggleModal(event, '#lrn_modal', false));
     $("#del_npl_modal").click(() => toggleModal(event, '#npl_modal', false));
 
+    $("#del_format_modal").click(() => toggleModal(event, '#format_modal', false));
+    
+    $("#network-form").on('change', '#csv', () => {
+        //var csv = require('./jquery.csv.js');
+        var file = event.target.files[0];
+		var reader = new FileReader();
+		reader.readAsText(file);
+		reader.onload = function(event) {
+			//Jquery.csv
+			createArray($.csv.toArrays(event.target.result));			
+		};
+        console.log("Here")
+        console.log(file)
+    });
+    
 }
 
 // toggle a modal
@@ -132,7 +163,16 @@ export const handleClearButton = function (event) {
     const form = $("#network-form");
     form[0]['title'].value = "";
     document.getElementById("description").value = "";
+    
 };
+
+/*
+<span class="file-name">
+                                    Screen Shot 2017-07-29 at 15.54.25.png
+                                </span>
+*/
+
+
 
 //Loading content into DOM
 
@@ -256,34 +296,33 @@ export const renderCreateNetworksArea = function () {
                     <div id="#atv_modal" class="modal">
                         <div class="modal-background"></div>
                         <div class="modal-card">
-                        <header class="modal-card-head">
-                            <button id="del_atv_modal" class="delete" aria-label="close"></button>
-                        </header>
-                        <section class="modal-card-body">
-                            <div class="content">
-                            <h1>What is an activation function?</h1>
-                            <p>Each neuron has something called an activation function. An activation function looks at an input value given to Neuron A and decides whether Neuron A should activate- and by how much.</p>
+                            <header class="modal-card-head">
+                                <button id="del_atv_modal" class="delete" aria-label="close"></button>
+                            </header>
+                            <section class="modal-card-body">
+                                <div class="content">
+                                    <h1>What is an activation function?</h1>
+                                    <p>Each neuron has something called an activation function. An activation function looks at an input value given to Neuron A and decides whether Neuron A should activate- and by how much.</p>
 
-                            <img src="img/Activation Function Pics/Step.png" alt="Smiley face" style="height:100; width:100">
+                                    <img src="img/Activation Function Pics/Step.png" alt="Smiley face" style="height:100; width:100">
 
-                            <p>The simplest activation function is called a “step” function (pictured above). If the value is given to Neuron A meets a certain criteria (for example, if value is >= 5) than Neuron A fires at 100%. Otherwise, Neuron A does not fire at all. The problem with this activation function is that it does not allow for nuance. Two blue pixels, for example, might not be the same shade of blue. A step activation function could tell you that a pixel was blue but a different activation function could better capture just how blue.</p>
-                            <p>This website allows for the use of four common activation functions that solve this problem:  Sigmoid, Tanh, Relu and Leaky Relu. Activation functions should be chosen based on whether the shape of the function approximates that of the problem you are trying to solve. However, if you don’t enjoy math, guess and check is also a great strategy.</p>
-                            <p>HINT: For binary classification using a neural network (what this website does), Sigmoid and Tanh will likely work the best as they approximate the shape of the binary “step” function.</p>
-                            
-                            <h2>Sigmoid Function:</h2>
-                            <img src="img/Activation Function Pics/Sigmoid.png" alt="Smiley face" style="height:80; width:80">
+                                    <p>The simplest activation function is called a “step” function (pictured above). If the value is given to Neuron A meets a certain criteria (for example, if value is >= 5) than Neuron A fires at 100%. Otherwise, Neuron A does not fire at all. The problem with this activation function is that it does not allow for nuance. Two blue pixels, for example, might not be the same shade of blue. A step activation function could tell you that a pixel was blue but a different activation function could better capture just how blue.</p>
+                                    <p>This website allows for the use of four common activation functions that solve this problem:  Sigmoid, Tanh, Relu and Leaky Relu. Activation functions should be chosen based on whether the shape of the function approximates that of the problem you are trying to solve. However, if you don’t enjoy math, guess and check is also a great strategy.</p>
+                                    <p>HINT: For binary classification using a neural network (what this website does), Sigmoid and Tanh will likely work the best as they approximate the shape of the binary “step” function.</p>
+                                    
+                                    <h2>Sigmoid Function:</h2>
+                                    <img src="img/Activation Function Pics/Sigmoid.png" alt="Smiley face" style="height:80; width:80">
 
-                            <h2>Tanh Function:</h2>
-                            <img src="img/Activation Function Pics/Tanh.jpg" alt="Smiley face" style="height:80; width:80">
+                                    <h2>Tanh Function:</h2>
+                                    <img src="img/Activation Function Pics/Tanh.jpg" alt="Smiley face" style="height:80; width:80">
 
-                            <h2>Relu Function:</h2>
-                            <img src="img/Activation Function Pics/Relu.png" alt="Smiley face" style="height:80; width:80">
+                                    <h2>Relu Function:</h2>
+                                    <img src="img/Activation Function Pics/Relu.png" alt="Smiley face" style="height:80; width:80">
 
-                            <h2>Leaky Relu Function:</h2>
-                            <img src="img/Activation Function Pics/Leaky Relu.jpg" alt="Smiley face" style="height:80; width:80">
-
-                            </div>
-                        </section>
+                                    <h2>Leaky Relu Function:</h2>
+                                    <img src="img/Activation Function Pics/Leaky Relu.jpg" alt="Smiley face" style="height:80; width:80">
+                                </div>
+                            </section>
                         </div>
                     </div>
 
@@ -294,20 +333,42 @@ export const renderCreateNetworksArea = function () {
                         </div>
                     </div>
 
+                    <div class="field">
+                        <label id="format_label" class="label" style="color:skyblue;">How Should I Format My Data?</label>
+                    </div>
+                    <div id="#format_modal" class="modal">
+                        <div class="modal-background"></div>
+                        <div class="modal-card">
+                            <header class="modal-card-head">
+                                <button id="del_format_modal" class="delete" aria-label="close"></button>
+                            </header>
+                            <section class="modal-card-body">
+                                <div class="content">
+                                    <h1>How should I format my data?</h1>
+                                    <p>1. First, using a tool like Google Docs or Microsoft Excel, arrange your training data so that the first row contains column names and subsequent rows contain numeric data. This data could take the form of either true/false (represented as “1” for true and “0” for false) or an integer.</p>
+
+                                    <p>2. Then, make sure that the first column contains the value that you are trying to predict (represented as “1” for true and “0” for false). For example:</p>
+
+                                    <img src="img/Data Example.png" alt="Smiley face" >
+
+                                    <p>3. Finally, download this data as a CSV file and upload it to this website. You may have any number of rows and any number of columns. More rows is generally better when training a network.</p>
+                                </div>
+                            </section>
+                        </div>
+                    </div>
+
                     <div class="file has-name is-fullwidth">
                         <label class="file-label">
-                            <input class="file-input" type="file" name="resume">
-                            <span class="file-cta">
-                                <span class="file-icon">
-                                    <i class="fas fa-upload"></i>
+                            <input id="csv" class="file-input" type="file" accept=".csv" name="myCsv">
+                                <span class="file-cta">
+                                    <span class="file-icon">
+                                        <i class="fas fa-upload"></i>
+                                    </span>
+                                    <span class="file-label">
+                                        Choose a file…
+                                    </span>
                                 </span>
-                                <span class="file-label">
-                                    Choose a file…
-                                </span>
-                            </span>
-                            <span class="file-name">
-                                Screen Shot 2017-07-29 at 15.54.25.png
-                            </span>
+                                
                         </label>
                     </div>
           
