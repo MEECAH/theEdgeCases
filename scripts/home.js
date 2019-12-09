@@ -157,13 +157,63 @@ export const homeNavBarPrivateRender = function () {
 `;
 }
 
-export const homeBodyPrivateRender = function () {
+export const homeBodyPrivateRender = function (user) {
     const $usersList = $(".users");
 
     db.collection('users').onSnapshot(snapshot => {
-        $usersList.html(snapshot.docs.map(renderUsers));
-    }, err => console.log(err.message));
+        $usersList.html(snapshot.docs.map(renderUsers(user)));
 
+        $usersList.on("click", "#like", () => {
+            handleLikeButton(event, user);
+        });
+
+    }, err => console.log(err.message));
+};
+
+export const handleLikeButton = function (event, user) {
+    event.preventDefault();
+    let profileId = event.target.value;
+    let currUser = user.uid;
+    let likeCounter;
+    let like;
+
+    db.collection('likes').doc(profileId).get().then(doc => {
+        let arrLikes = doc.data().liked;
+        let isUnlike = arrLikes.filter(item => item == currUser);
+        likeCounter = doc.data().likesCount;
+
+        if (isUnlike.length > 0) {
+            let index = arrLikes.indexOf(currUser);
+            arrLikes.splice(index, 1);
+            likeCounter--;
+            like = "Like";
+
+            db.collection('likes').doc(profileId).update({
+                liked: arrLikes,
+                likesCount: likeCounter,
+            });
+
+        } else {
+            arrLikes.push(currUser);
+            likeCounter++;
+            like = "Unlike";
+
+            db.collection('likes').doc(profileId).update({
+                liked: arrLikes,
+                likesCount: likeCounter,
+            });
+        }
+    }).then(() => {
+        let $likeDiv = $("#Like" + profileId);
+        let $CountDiv = $("#Count" + profileId);
+        $CountDiv.html(`
+                <div>
+                    <p class="heading">Likes</p>
+                    <p class="title">${likeCounter}</p>
+                </div>
+            `);
+        $likeDiv.html(`</div><button id="like" value="${profileId}" class="level-item button is-dark" type = "button" style="float:right; width:80px"> ${like} </button>`);
+    });
 };
 
 export const userFormat = function () {
@@ -177,41 +227,114 @@ export const userFormat = function () {
     `;
 };
 
-export const renderUsers = function (doc) {
+export const renderUsers = function (user) {
 
-    if (doc.length < 1) {
-        return ``;
-    }
-    const currUser = doc.data();
+    return function (doc) {
 
-    return `
-    <div class="card">
-    <div class="card-image">
-      <figure class="image is-128x128">
-        <img src="https://bulma.io/images/placeholders/128x128.png" alt="Placeholder image">
-      </figure>
-    </div>
-    <div class="card-content">
-      <div class="media">
-        <div class="media-left">
-          <figure class="image is-48x48">
-            <img src="https://bulma.io/images/placeholders/96x96.png" alt="Placeholder image">
-          </figure>
-        </div>
-        <div class="media-content">
-          <p class="title is-4">${currUser.name}</p>
-          <p class="title is-6">${currUser.email}</p>
-        </div>
-      </div>
-  
-      <div class="content">
-        ${currUser.bio}
-        <br>
-      </div>
-    </div>
-  </div>  
+        if (doc.length < 1) {
+            return ``;
+        }
+        let like = "";
+        let likesCount = 0;
+        let userLiked;
+
+        db.collection('users').doc(doc.id).collection('networks').orderBy('title').get().then(item => {
+            let $userNetworks = $('#' + doc.id);
+
+            if (item.docs.length > 0) {
+                $userNetworks.html(item.docs.map(renderNetworks));
+            }
+        });
+
+        db.collection('likes').doc(doc.id).get().then(item => {
+            if (item.data().liked.length > 0) {
+                userLiked = item.data().liked.filter(id => id == user.uid);
+                if (userLiked.length > 0) {
+                    like = "Unlike";
+                }
+                likesCount = item.data().likesCount;
+            }
+        }).then(() => {
+            if (like != "Unlike") {
+                like = "Like";
+            }
+            let $likeDiv = $("#Like" + doc.id);
+            let $CountDiv = $("#Count" + doc.id);
+            $CountDiv.html(`
+                <div>
+                    <p class="heading">Likes</p>
+                    <p class="title">${likesCount}</p>
+                </div>
+            `);
+            $likeDiv.html(`</div><button id="like" value="${doc.id}" class="level-item button is-dark" type = "button" style="float:right; width:80px"> ${like} </button>`);
+        });
+
+        const currUser = doc.data();
+        let userPic;
+
+        if (currUser.pic.length > 0) {
+            userPic = currUser.pic;
+        } else {
+            userPic = "https://bulma.io/images/placeholders/256x256.png";
+        }
+
+        return `
+        <div class="card">
+            <div class="card-content">
+                <div class="media">
+                    <div class="media-left">
+                        <figure class="image is-256x256">
+                            <img src=${userPic} alt="Placeholder image" style="width:256px; height:256px">
+                        </figure>
+                    </div>
+                    <div class="media-content">
+                        <br>
+                        <p class="title is-2">${currUser.name}</p>
+                        <p class="title is-6">${currUser.email}</p>
+                        <br>
+                        <p class="subtitle is-4 content">${currUser.bio}</p>
+                    </div>
+                    <br>
+                    <div>                    
+                        <div id="Count${doc.id}" class="level-item has-text-centered">
+                            <div>
+                                <p class="heading">Likes</p>
+                                <p class="title">0</p>
+                            </div>
+                        </div>
+                        <br>
+                        <div id="Like${doc.id}">
+                            <button id="like" value="${doc.id}" class="level-item button is-dark" type = "button" style="float:right; width:80px"> ${like} </button>
+                        </div>
+                    </div>
+                </div>
+                <br>
+                <div id="${doc.id}"></div>                     
+            </div>
+        </div>  
     `;
+    }
 };
 
+export const renderNetworks = function (doc) {
+    let network = doc.data();
+    return `
+    <div class="column is-full">
+        <div class="card">
+            <header class="card-header">
+                <p class="card-header-title">
+                    ${network.title}
+                </p>                
+            </header>
+            <div class="card-content">
+                <div class="content">
+                    <i> ${network.description} </i>
+                    <br>
+                </div>
+            </div>            
+        </div>
+    </div>
+    `;
+};
 
 
