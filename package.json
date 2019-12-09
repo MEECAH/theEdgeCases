@@ -1,7 +1,6 @@
 {
   "name": "theedgecases",
   "version": "1.0.0",
-  "description": "",
   "main": "render.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -22,5 +21,7 @@
     "bulma": "^0.8.0",
     "jquery": "^3.4.1",
     "jquery-ui-dist": "^1.12.1"
-  }
+  },
+  "devDependencies": {},
+  "description": ""
 }
