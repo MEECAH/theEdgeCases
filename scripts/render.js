@@ -1,7 +1,7 @@
-import { handleSignupButton, handleLogoutButton, handleSigninButton } from "./auth.js";
+import { handleSignupButton, handleLogoutButton, handleSigninButton, handleSigninWithGoogle } from "./auth.js";
 import { homeNavBarPublicRender, homeBodyPublicRender, homeBodyPrivateRender, homeNavBarPrivateRender, userFormat } from "./home.js";
 import { contactPageRender, simpleNavBar } from "./contact.js";
-import { workPlaceRender, numberOfNetworks } from "./workSpace.js";
+import { workPlaceRender, numberOfNetworksFunction, workPlaceNavBar } from "./workSpace.js";
 
 export const renderPage = function (user, page) {
 
@@ -27,6 +27,9 @@ export const publicInfo = function () {
     const $loginForm = $('#login-form');
     $loginForm.on("submit", handleSigninButton);
 
+    //login with google
+    $loginForm.on("click", "#googleSignIn", handleSigninWithGoogle);
+
     const $body = $("#body");
     $body.html(homeBodyPublicRender());
 };
@@ -43,9 +46,6 @@ export const allUsersInfo = function (user, page) {
     //log out
     const $logout = $("#logout");
     $logout.on("click", handleLogoutButton);
-
-    //User account info
-    renderAccountInfo(user);
 
     //Setting home page as default when rendering for first time
     if (page != -1) {
@@ -67,12 +67,15 @@ export const allUsersInfo = function (user, page) {
         setPage(3, user);
     });
 
+    setTimeout(() => {
+        //User account info
+        renderAccountInfo(user);
+    }, 1000);
 };
 
 export const setPage = function (page, user) {
     const $body = $("#body");
     const $root = $("#root");
-    let networkCount = numberOfNetworks(user);
 
     switch (page) {
         //Home page
@@ -85,14 +88,14 @@ export const setPage = function (page, user) {
 
         //Contact
         case 2:
-            $root.html(simpleNavBar(networkCount));
+            $root.html(simpleNavBar());
             $body.html(contactPageRender());
             allUsersInfo(user, -1);
             break;
 
         //Work place
         case 3:
-            $root.html(simpleNavBar(networkCount));
+            $root.html(workPlaceNavBar());
             workPlaceRender(user);
             allUsersInfo(user, -1);
             break;
@@ -261,9 +264,10 @@ export const handleEditUserButton = function (event, user, file) {
     });
 };
 
-export const loadPageIntoDOM = function () {
+export const loadPageIntoDOM = async function () {
 
     const $root = $("#root");
+    let result = await numberOfNetworksFunction();
 
     // listen for auth status changes
     auth.onAuthStateChanged(user => {
@@ -277,24 +281,6 @@ export const loadPageIntoDOM = function () {
             renderPage();
         }
     });
-
-    //TO DO !!!!!!!
-    // Nav bar sticky
-    /*
-    window.onscroll = function () { myFunction() };
-
-    let navbar = $("#navBar");
-    let sticky = navbar.offsetTop;
-
-    function myFunction() {
-        if (window.pageYOffset >= sticky) {
-            navbar.classList.add("sticky")
-        } else {
-            navbar.classList.remove("sticky");
-        }
-    }
-*/
-
 };
 /**
  * Use jQuery to execute the loadPageIntoDOM function after the page loads
