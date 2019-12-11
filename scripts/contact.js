@@ -79,7 +79,7 @@ export const contactPageRender = function () {
                         <article class="media">
                             <figure class="media-left image is-128x128">
                                 <p class="image is-128x128">
-                                    <img class="is-rounded" src="https://bulma.io/images/placeholders/128x128.png">
+                                    <img class="is-rounded" src="img/micah.jpg" alt="Placeholder image" style="width: 128px; height: 128px">
                                 </p>
                             </figure>
                             <div class="media-content">
@@ -94,7 +94,7 @@ export const contactPageRender = function () {
                         <article class="media">
                             <figure class="media-left image is-128x128">
                                 <p class="image is-128x128">
-                                    <img class="is-rounded" src="https://bulma.io/images/placeholders/128x128.png">
+                                    <img class="is-rounded" src="img/elijah.jpg" alt="Placeholder image" style="width: 128px; height: 128px">
                                 </p>
                             </figure>
                             <div class="media-content">
