@@ -6,7 +6,9 @@
     <!-- Compiled and minified CSS -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
     <link rel="stylesheet" href="node_modules/bulma/css/bulma.css" />
-    <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/smoothness/jquery-ui.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/4.1.2/papaparse.min.js"></script>
+    <script src="https://cdn.rawgit.com/BrainJS/brain.js/45ce6ffc/browser.js"></script>
+    <script src="https://unpkg.com/brain.js@1.0.0-rc.3/browser.js"></script>
     <script src="node_modules/jquery/dist/jquery.js"></script>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -24,7 +26,7 @@
                         Welcome to <i>Masheen Learnin'</i>
                     </h1>
                     <h2 class="subtitle">
-                        Train a neural network, build your social network
+                        Train your neuron network
                     </h2>
                 </div>
             </div>
@@ -49,7 +51,6 @@
      https://firebase.google.com/docs/web/setup#available-libraries -->
     <script src="https://www.gstatic.com/firebasejs/7.5.0/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/7.5.0/firebase-firestore.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/7.5.0/firebase-storage.js"></script>
     <script src="https://www.gstatic.com/firebasejs/7.5.0/firebase-analytics.js"></script>
 
     <script>
@@ -70,11 +71,7 @@
         //Make firestore references
         const auth = firebase.auth();
         const db = firebase.firestore();
-        const storage = firebase.storage();
-        //Google sign in
-        const provider = new firebase.auth.GoogleAuthProvider();
-        //Global variable
-        let numberOfNetworks;
+        //let storageRef = firebase.storage().ref();
 
     </script>
     <!-- Compiled and minified JavaScript -->
@@ -84,9 +81,6 @@
     <script src="/scripts/render.js" type="module"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.0.0-alpha1/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-csv/0.71/jquery.csv-0.71.min.js"></script>
-    <script src="node_modules/jquery-ui-dist/external/jquery/jquery.js"></script>
-    <script src="node_modules/jquery-ui-dist/jquery-ui.js"></script>
-
 </body>
 
 </html>
