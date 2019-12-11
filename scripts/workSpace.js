@@ -168,23 +168,31 @@ export const handleSaveButton = function (event, user, network) {
 export const handleSubmitButton = function (event, user) {
     event.preventDefault();
     event.stopPropagation();
-
-    //(act, hidLay, nodesPerLay, iter, lrnRat, DATA, numRows, inputColNames, outputColName) {
-
+    
     const form = $("#network-form");
     const title = form[0]['title'].value;
     const description = form[0]['description'].value;
+    let networkCounter = 0;
 
+    //(act, hidLay, nodesPerLay, iter, lrnRat, DATA, numRows, inputColNames, outputColName) 
     const activationFunction = $('#atv_input')[0].value;
     const hiddenLayers = $('#hid_input')[0].value;
     const nodesPerLayer = $('#npl_input')[0].value;
     const iterations = $('#epc_input')[0].value;
     const learningRate = $('#lrn_input')[0].value;
 
-    //console.log([activationFunction, parseFloat(hiddenLayers), parseFloat(nodesPerLayer), parseFloat(iterations), parseFloat(learningRate), DATA, DATA.length, columns, pdict]);
     let myNetObj = buildANetwork(activationFunction, hiddenLayers, nodesPerLayer, iterations, learningRate, DATA, DATA.length, columns, pdict);
-   // console.log(myNetObj)
-    
+   
+    //updating network count
+    db.collection('public').doc('allNetworks').get().then(doc => {
+        networkCounter = doc.data().networkCount;
+        networkCounter++;
+    }).then(() => {
+        db.collection('public').doc('allNetworks').update({
+            networkCount: networkCounter,
+        });
+    });
+  
     db.collection('users').doc(user.uid).collection('networks').add({
         title: title,
         description: description,
@@ -631,9 +639,54 @@ export const renderUncompleteNetwork = function(network) {
     `;
 }
 
-//TO DO
 //Calculating number of networks
-export const numberOfNetworks = function (user) {
-    let count = 0;
-    return count;
+export const numberOfNetworksFunction = async function () {
+    let result = await db.collection('public').doc('allNetworks').get().then((doc) => {
+        numberOfNetworks = doc.data().networkCount;
+    });
+    //updating number of networks
+    db.collection('public').doc('allNetworks').onSnapshot(doc => {
+        numberOfNetworks = doc.data().networkCount;
+    });
+};
+
+export const workPlaceNavBar = function () {
+
+    return `    
+    <!-- NAVBAR -->
+    <nav class=" z-depth-0 white lighten-4" id="navBar">
+        <div class="nav-wrapper container">
+            <a href="#" class="brand-logo">
+                <img src="img/logo.png" style="width: 50px; height: 50px; margin-top: 5px;">
+            </a>
+            <ul id="nav-mobile" class="right hide-on-med-and-down">
+                <li class="logged-in">
+                    <a href="#" id="homePage" class="grey-text">Home</a>
+                </li>                
+                <li class="logged-in">
+                    <a href="#" class="grey-text modal-trigger" data-target="modal-account">Account</a>
+                </li>
+                <li class="logged-in">
+                    <a href="#" id="workPlace" class="grey-text">Work Place</a>
+                </li>
+                <li class="logged-in">
+                    <a href="#" id="contactPage" class="grey-text">Contact Us</a>
+                </li>
+                <li class="logged-in">
+                    <a href="#" class="grey-text" id="logout">Logout</a>
+                </li>
+            </ul>            
+        </div>
+    </nav>
+
+    <!-- ACCOUNT MODAL -->
+    <div id="modal-account" class="modal">
+        <div class="modal-content center-align">
+            <br>
+            <p class="subtitle is-4">Account Details</p> 
+            <br>           
+            <div class="account-details"></div>
+        </div>
+    </div>
+`;
 };
