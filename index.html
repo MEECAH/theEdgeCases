@@ -6,6 +6,9 @@
     <!-- Compiled and minified CSS -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
     <link rel="stylesheet" href="node_modules/bulma/css/bulma.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/4.1.2/papaparse.min.js"></script>
+    <script src="https://cdn.rawgit.com/BrainJS/brain.js/45ce6ffc/browser.js"></script>
+    <script src="https://unpkg.com/brain.js@1.0.0-rc.3/browser.js"></script>
     <script src="node_modules/jquery/dist/jquery.js"></script>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -68,6 +71,7 @@
         //Make firestore references
         const auth = firebase.auth();
         const db = firebase.firestore();
+        //let storageRef = firebase.storage().ref();
 
     </script>
     <!-- Compiled and minified JavaScript -->
@@ -75,6 +79,8 @@
     <script src="node_modules/axios/dist/axios.js"></script>
     <script src="/scripts/auth.js" type="module"></script>
     <script src="/scripts/render.js" type="module"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.0.0-alpha1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-csv/0.71/jquery.csv-0.71.min.js"></script>
 </body>
 
 </html>
