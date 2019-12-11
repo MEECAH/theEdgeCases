@@ -238,7 +238,7 @@ export const renderCreateNetworksArea = function () {
                     </div>
 
                     <div class="field">
-                        <a label class="label" id="lrn_label" >Learning Rate</label>
+                        <label class="label" id="lrn_label" >Learning Rate</label>
                         <div class="control">
                             <div>
                                 <div class="control">
@@ -263,7 +263,7 @@ export const renderCreateNetworksArea = function () {
                     </div>
 
                     <div class="field">
-                        <a label class="label" id="epc_label">Epocs</label>
+                        <label class="label" id="epc_label">Epocs</label>
                         <div class="control">
                             <input id="epc_input" class="input" type="number" placeholder="300" required/>
                         </div>
@@ -277,14 +277,14 @@ export const renderCreateNetworksArea = function () {
                         <section class="modal-card-body">
                             <div class="content">
                             <h1>What is an epoc?</h1>
-                            <p>The number of epochs is the number of times that a neural network trains on a given data set. More epochs could lead to greater accuracy but will it will take a longer amount of time to train the neural network. 30 is a good number of epochs for training most neural networks.</p>
+                            <p>The number of epochs is the number of times that a neural network trains on a given data set. More epochs could lead to greater accuracy but will it will take a longer amount of time to train the neural network. 300 is a good number of epochs for training most neural networks.</p>
                             </div>
                         </section>
                         </div>
                     </div>
 
                     <div class="field">
-                        <a label class="label" id="hid_label">Hidden Layers</label>
+                        <label class="label" id="hid_label">Hidden Layers</label>
                         <div class="control">
                             <input id="hid_input" class="input" type="number" placeholder="4" required/>
                         </div>
@@ -304,7 +304,7 @@ export const renderCreateNetworksArea = function () {
                         </div>
 
                     </div><div class="field">
-                        <a label class="label" id="npl_label">Nodes Per Layer</label>
+                        <label class="label" id="npl_label">Nodes Per Layer</label>
                         <div class="control">
                             <input id="npl_input" class="input" type="number" placeholder="4" required/>
                         </div>
@@ -325,14 +325,14 @@ export const renderCreateNetworksArea = function () {
                     </div>
 
                     <div class="field">
-                        <a label class="label" id="atv_label" >Activation Function</label>
+                        <label class="label" id="atv_label" >Activation Function</label>
                         <div class="control">
                             <div class="select">
                                 <select id="atv_input">
-                                    <option>Sigmoid</option>
-                                    <option>Tanh</option>
-                                    <option>Relu</option>
-                                    <option>Leaky Relu</option>
+                                    <option>sigmoid</option>
+                                    <option>tanh</option>
+                                    <option>relu</option>
+                                    <option>leaky-relu</option>
                                 </select>
                             </div>
                         </div>
@@ -378,7 +378,7 @@ export const renderCreateNetworksArea = function () {
                     </div>
 
                     <div class="field">
-                        <a label id="format_label" class="label">How Should I Format My Data?</label>
+                        <label id="format_label" class="label">How Should I Format My Data?</label>
                     </div>
                     <div id="#format_modal" class="modal">
                         <div class="modal-background"></div>
