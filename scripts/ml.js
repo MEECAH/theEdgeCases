@@ -2,17 +2,31 @@ export const getAccuracy = function(net, testData) {
     let hits = 0;
     testData.forEach((datapoint) => {
       const output = net.run(datapoint.input);
-      const outputArray = [Math.round(output[0]), Math.round(output[1]), Math.round(output[2])];
-      if (outputArray[0] === datapoint.output[0] && outputArray[1] === datapoint.output[1] && outputArray[2] === datapoint.output[2]) {
+      if (Math.round(output[0]) == datapoint.output) {
         hits += 1;
       }
     });
     return hits / testData.length;  
 }
 
-export const buildANetwork = async function (act, hidLay, nodesPerLay, iter, lrnRat, DATA, numRows, inputColNames, outputColName) {
+export const shuffle = function(array) {
+    var currentIndex = array.length, temporaryValue, randomIndex;
+    while (0 !== currentIndex) {
+
+      randomIndex = Math.floor(Math.random() * currentIndex);
+      currentIndex -= 1;
+
+      temporaryValue = array[currentIndex];
+      array[currentIndex] = array[randomIndex];
+      array[randomIndex] = temporaryValue;
+    }
+    return array;
+  }
+
+export const buildANetwork = function (act, hidLay, nodesPerLay, iter, lrnRat, DATA, numRows, inputColNames, outputColName) {
     const SPLIT = Math.round(numRows * .66);
-    console.log(iter)
+    
+    DATA = shuffle(DATA);
     const trainData = DATA.slice(0, SPLIT);
     const testData = DATA.slice(SPLIT + 1);
 
@@ -20,19 +34,30 @@ export const buildANetwork = async function (act, hidLay, nodesPerLay, iter, lrn
     for (let i = hidLay; i > 0; i--) {
         myArr.push(nodesPerLay);
     }
-
-    const network = new brain.NeuralNetwork({
-        invalidTrainOptsShouldThrow: false,
-        activation: act.toLowerCase(),  //Sets the function for activation
+    //console.log(act)
+    //console.log(myArr)
+    //console.log(iter)
+    //console.log(lrnRat)
+    const config = {
+        activation: act,  //Sets the function for activation
         hiddenLayers: myArr,  //Sets the number of hidden layers
         iterations: iter, //The number of runs before  the neural net and then stop training
         learningRate: lrnRat //The multiplier for the backpropagation changes
-    });
+    }
+    const network = new brain.NeuralNetwork(config);
 
-    network.trainAsync(trainData);
+    network.train(trainData);
 
-    const accuracy = getAccuracy(network, testData);
-
+    const accuracy = getAccuracy(network, testData); //0
+    /*
+    while (accuracy <= 0 ){
+        let a = getAccuracy(network, testData);
+        if (a > 0) {
+            accuracy = a;
+        };
+    }
+    */
+    console.log(accuracy)
     return {
         acc: accuracy,
         net: network,
@@ -49,13 +74,7 @@ export const buildANetwork = async function (act, hidLay, nodesPerLay, iter, lrn
     }
 }
 
-export const useNet = async function(net, inputArr) {
-    let result = await net.run();
-    return result;
-    //return Math.round(net.run(inputArr));
-}
-
-export const getNetFromJson = function (myJson) {
+export const netFromJson = function (myJson) {
     const net = new brain.NeuralNetwork();
     return net.fromJSON(myJson);
 }
