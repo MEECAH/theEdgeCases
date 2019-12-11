@@ -18,6 +18,19 @@ var createArray = function(data) {
     }	
 };
 
+var createArray = function (data) {
+    if (data !== null && data !== "" && data.length > 1) {
+        this.data = data;
+        StatsProcessor(data);
+        $("#statOutPut").removeClass("hidden");
+        $("#errorOutPut").addClass("hidden");
+    } else {
+        $("#errorOutPut").removeClass("hidden");
+        $("#statOutPut").addClass("hidden");
+        $("#errorOutPut li").html('There is no data to import');
+    }
+};
+
 export const workPlaceRender = function (user) {
     let modals;
     const $body = $("#body");
@@ -83,6 +96,31 @@ export const workPlaceRender = function (user) {
     $("#del_npl_modal").click(() => toggleModal(event, '#npl_modal', false));
 
     $("#del_format_modal").click(() => toggleModal(event, '#format_modal', false));
+
+    $("#network-form").on('change', '#csv', () => {
+        //var csv = require('./jquery.csv.js');
+        var file = event.target.files[0];
+        var reader = new FileReader();
+        reader.readAsText(file);
+        reader.onload = function (event) {
+            //Jquery.csv
+            createArray($.csv.toArrays(event.target.result));
+        };
+        console.log("Here")
+        console.log(file)
+    });
+
+}
+
+// toggle a modal
+export const toggleModal = function (event, modalID, turnOn) {
+    event.preventDefault;
+    if (turnOn) {
+        document.getElementById(modalID).className += " is-active";
+    } else {
+        document.getElementById(modalID).className = "modal";
+    }
+}
     
     $("#network-form").on('change', '#csv', () => {
         let file = event.target.files[0];
@@ -142,13 +180,14 @@ export const toggleModal = function (event, modalID, turnOn) {
     } else {
         document.getElementById(modalID).className = "modal";
     }
-}
-
+};
 
 //Deleting networks from firestore
 export const handleDeleteButton = function (user, network) {
     event.preventDefault();
     const networkId = network[0].getAttribute('data-id');
+
+    //updating user network database
     db.collection('users').doc(user.uid).collection('networks').doc(networkId).delete();
 };
 
@@ -184,6 +223,27 @@ export const handleSubmitButton = async function (event, user) {
     const form = $("#network-form");
     const title = form[0]['title'].value;
     const description = form[0]['description'].value;
+    let networkCounter = 0;
+  
+    //updating network count
+    db.collection('public').doc('allNetworks').get().then(doc => {
+        networkCounter = doc.data().networkCount;
+        networkCounter++;
+    }).then(() => {
+        db.collection('public').doc('allNetworks').update({
+            networkCount: networkCounter,
+        });
+    });
+  
+   //updating user network database
+     db.collection('users').doc(user.uid).collection('networks').add({
+        title: title,
+        description: description
+    }).then(() => {
+        handleClearButton();
+    }).catch(err => {
+        alert(err.message);
+    });
 
     const activationFunction = $('#atv_input')[0].value;
     const hiddenLayers = $('#hid_input')[0].value;
@@ -194,15 +254,6 @@ export const handleSubmitButton = async function (event, user) {
     console.log([activationFunction, parseFloat(hiddenLayers), parseFloat(nodesPerLayer), parseFloat(iterations), parseFloat(learningRate), DATA, DATA.length, columns, pdict]);
     let a = await buildANetwork(activationFunction, hiddenLayers, nodesPerLayer, iterations, learningRate, DATA, DATA.length, columns, pdict);
     console.log(a)
-    
-    db.collection('users').doc(user.uid).collection('networks').add({
-        title: title,
-        description: description
-    }).then(() => {
-        handleClearButton();
-    }).catch(err => {
-        alert(err.message);
-    });
 };
 
 //Clearing form
@@ -213,7 +264,6 @@ export const handleClearButton = function (event) {
     const form = $("#network-form");
     form[0]['title'].value = "";
     document.getElementById("description").value = "";
-    
 };
 
 //Loading content into DOM
@@ -225,15 +275,13 @@ export const renderCreateNetworksArea = function () {
             </div>
         <div class="column">
             <div class="box">
-                <form id="network-form">
-                    
+                <form id="network-form">                    
                     <div class="field">
                         <label class="label">Title</label>
                         <div class="control">
                             <input id="title" class="input" type="text" placeholder="Enter title for your network" required/>
                         </div>
                     </div>
-
                     <div class="field">
                         <label class="label" id="lrn_label" >Learning Rate</label>
                         <div class="control">
@@ -299,7 +347,6 @@ export const renderCreateNetworksArea = function () {
                             </div>
                         </section>
                         </div>
-
                     </div><div class="field">
                         <label class="label" id="npl_label">Nodes Per Layer</label>
                         <div class="control">
@@ -550,9 +597,54 @@ export const renderNetworksArea = function (network) {
     `;
 };
 
-//TO DO
 //Calculating number of networks
-export const numberOfNetworks = function (user) {
-    let count = 0;
-    return count;
+export const numberOfNetworksFunction = async function () {
+    let result = await db.collection('public').doc('allNetworks').get().then((doc) => {
+        numberOfNetworks = doc.data().networkCount;
+    });
+    //updating number of networks
+    db.collection('public').doc('allNetworks').onSnapshot(doc => {
+        numberOfNetworks = doc.data().networkCount;
+    });
+};
+
+export const workPlaceNavBar = function () {
+
+    return `    
+    <!-- NAVBAR -->
+    <nav class=" z-depth-0 white lighten-4" id="navBar">
+        <div class="nav-wrapper container">
+            <a href="#" class="brand-logo">
+                <img src="img/logo.png" style="width: 50px; height: 50px; margin-top: 5px;">
+            </a>
+            <ul id="nav-mobile" class="right hide-on-med-and-down">
+                <li class="logged-in">
+                    <a href="#" id="homePage" class="grey-text">Home</a>
+                </li>                
+                <li class="logged-in">
+                    <a href="#" class="grey-text modal-trigger" data-target="modal-account">Account</a>
+                </li>
+                <li class="logged-in">
+                    <a href="#" id="workPlace" class="grey-text">Work Place</a>
+                </li>
+                <li class="logged-in">
+                    <a href="#" id="contactPage" class="grey-text">Contact Us</a>
+                </li>
+                <li class="logged-in">
+                    <a href="#" class="grey-text" id="logout">Logout</a>
+                </li>
+            </ul>            
+        </div>
+    </nav>
+
+    <!-- ACCOUNT MODAL -->
+    <div id="modal-account" class="modal">
+        <div class="modal-content center-align">
+            <br>
+            <p class="subtitle is-4">Account Details</p> 
+            <br>           
+            <div class="account-details"></div>
+        </div>
+    </div>
+`;
 };

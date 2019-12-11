@@ -1,7 +1,5 @@
 export const homeNavBarPublicRender = function () {
 
-    let numberOfNetworks = 0;
-
     return `
     <!-- NAVBAR -->
     <nav class=" z-depth-0 white lighten-4" id="navBar">
@@ -21,7 +19,8 @@ export const homeNavBarPublicRender = function () {
                 </li>
             </ul>
         </div>
-    </nav>  
+    </nav>
+
     <!-- SIGN UP MODAL -->
     <div id="modal-signup" class="modal">
         <div class="modal-content">
@@ -64,11 +63,19 @@ export const homeNavBarPublicRender = function () {
                     <label for="login-password">Your password</label>
                 </div>
                 <button class="btn yellow darken-2 z-depth-0">Login</button>
+                <div>
+                    <br>
+                    <button id="googleSignIn" class="btn yellow darken-2 z-depth-0">
+                        <span class="icon is-medium">
+                            <i class="fab fa-google"></i>
+                        </span>
+                        <span>Sign in with Google</span>
+                    </button>
+                </div>
             </form>
         </div>
     </div>    
 `;
-
 };
 
 export const homeBodyPublicRender = function () {
@@ -76,6 +83,13 @@ export const homeBodyPublicRender = function () {
     return `
     <div class="card">
         <div class="content has-text-centered">
+            <div class="card-content" style="background-color:rgb(56, 55, 55)">
+                <div class="media">
+                    <div class="media-left">
+                        <button onclick="window.open('https://skymind.ai/wiki/neural-network','resizable=yes')" class="button is-dark is-inverted is-outlined">Learn More</button>
+                    </div>
+                </div>
+            </div>
             <figure class="image">
                 <img src="img/laptop1.jpg" alt="Placeholder image" style="width: 500px; height: 300px; margin-top: 50px">
             </figure>
@@ -366,5 +380,3 @@ export const renderNetworks = function (doc) {
     </div>
     `;
 };
-
-

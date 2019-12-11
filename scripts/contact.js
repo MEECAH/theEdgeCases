@@ -1,10 +1,10 @@
-export const simpleNavBar = function (networkCount) {
+export const simpleNavBar = function () {
 
     return `    
     <!-- NAVBAR -->
     <nav class=" z-depth-0 white lighten-4" id="navBar">
         <div id="networks" class="content is-family-sans-serif has-text-weight-medium has-text-white">
-            <p>We have trainned ${networkCount} networks!!</p>
+            <p>We have trainned ${numberOfNetworks} networks!!</p>
         </div>
         <div class="nav-wrapper container">
             <a href="#" class="brand-logo">

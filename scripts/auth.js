@@ -1,3 +1,4 @@
+
 export const handleSignupButton = function (event) {
 
     event.preventDefault();
@@ -26,7 +27,11 @@ export const handleSignupButton = function (event) {
         const modal = document.querySelector('#modal-signup');
         M.Modal.getInstance(modal).close();
         form.reset();
-    }).catch(err => alert(err.message));
+    }).catch(err => {
+        if (err.message != "t is null") {
+            alert(err.message);
+        }
+    });
 };
 
 export const handleLogoutButton = function (event) {
@@ -53,3 +58,36 @@ export const handleSigninButton = function (event) {
     }).catch(err => alert(err.message));
 };
 
+export const handleSigninWithGoogle = function (event) {
+    event.preventDefault();
+
+    firebase.auth().signInWithPopup(provider).then(function (result) {
+        let token = result.user.uid;
+        // The signed-in user info.
+        let user = result.user;
+
+        db.collection('users').doc(token).get().then((doc) => {
+
+            //First time user
+            if (doc.data() == undefined) {
+                //creating likes collection for user
+                let arrLikes = [];
+                db.collection('likes').doc(token).set({
+                    liked: arrLikes,
+                    likesCount: 0,
+                });
+                //adding user at user collection
+                return db.collection('users').doc(token).set({
+                    name: user.displayName,
+                    email: user.email,
+                    bio: "",
+                    pic: user.photoURL,
+                });
+            }
+        });
+    }).catch(function (error) {
+        // Handle Errors here.
+        let errorMessage = error.message;
+        alert(errorMessage);
+    });
+};
