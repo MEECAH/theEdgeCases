@@ -10,35 +10,49 @@ export const getAccuracy = function(net, testData) {
     return hits / testData.length;  
 }
 
-export const buildANetwork = async function (act, hidLay, iter, lrnRat, DATA) {
-
-    const SPLIT = 99;
+export const buildANetwork = async function (act, hidLay, nodesPerLay, iter, lrnRat, DATA, numRows, inputColNames, outputColName) {
+    const SPLIT = Math.round(numRows * .66);
+    console.log(iter)
     const trainData = DATA.slice(0, SPLIT);
     const testData = DATA.slice(SPLIT + 1);
 
+    let myArr = []
+    for (let i = hidLay; i > 0; i--) {
+        myArr.push(nodesPerLay);
+    }
+
     const network = new brain.NeuralNetwork({
-        activation: act,  //Sets the function for activation
-        hiddenLayers: [hidLay],  //Sets the number of hidden layers
+        invalidTrainOptsShouldThrow: false,
+        activation: act.toLowerCase(),  //Sets the function for activation
+        hiddenLayers: myArr,  //Sets the number of hidden layers
         iterations: iter, //The number of runs before  the neural net and then stop training
         learningRate: lrnRat //The multiplier for the backpropagation changes
     });
 
-    network.train(trainData);
+    network.trainAsync(trainData);
 
     const accuracy = getAccuracy(network, testData);
 
     return {
         acc: accuracy,
         net: network,
-        json: netToJson(network),
+        inputs: inputColNames,
+        outputs: outputColName,
+
         data: DATA,
         settings: {
             activation: act,  
-            hiddenLayers: [hidLay],  
+            hiddenLayers: myArr,  
             iterations: iter, 
             learningRate: lrnRat 
         }
     }
+}
+
+export const useNet = async function(net, inputArr) {
+    let result = await net.run();
+    return result;
+    //return Math.round(net.run(inputArr));
 }
 
 export const getNetFromJson = function (myJson) {

@@ -1,4 +1,22 @@
+import { buildANetwork, useNet } from "./ml.js";
+
 let $editForm;
+let pdict = "";
+let columns = [];
+let DATA = []
+
+var createArray = function(data) {	
+    if(data !== null && data !== "" && data.length > 1) {
+        this.data = data;
+        StatsProcessor(data);
+        $("#statOutPut").removeClass( "hidden" );			
+        $("#errorOutPut").addClass( "hidden" );			
+    } else {
+        $("#errorOutPut").removeClass( "hidden" );
+        $("#statOutPut").addClass( "hidden" );
+        $("#errorOutPut li").html('There is no data to import');	
+    }	
+};
 
 var createArray = function (data) {
     if (data !== null && data !== "" && data.length > 1) {
@@ -103,7 +121,66 @@ export const toggleModal = function (event, modalID, turnOn) {
         document.getElementById(modalID).className = "modal";
     }
 }
+    
+    $("#network-form").on('change', '#csv', () => {
+        let file = event.target.files[0];
 
+        Papa.parse(file, {
+            dynamicTyping: true,
+            complete: function(results) {
+                
+                file = results.data
+
+                pdict = file[0][0];
+                file[0].shift(0);
+                columns = file[0];
+                file.shift(0);
+
+                DATA = []
+
+                file.forEach(arr => {
+                    let temp = {
+                        input: [],
+                        output: []
+                    }
+                    temp.output = [].push(arr[0]);
+                    for (let i = 1; i < arr.length; i++) {
+                        temp.input.push(arr[i]);
+                    }
+                    DATA.push(temp)
+                });
+
+                console.log("pdict:")
+                console.log(pdict)
+
+                console.log("columns:")
+                console.log(columns)
+
+                console.log("data:")
+                console.log(DATA)
+            }
+        })
+       
+        /*
+
+        console.log(pdict)
+        console.log(columns)
+        console.log("Here")
+        
+        */
+    });
+    
+}
+
+// toggle a modal
+export const toggleModal = function (event, modalID, turnOn) {
+    event.preventDefault;
+    if (turnOn){
+        document.getElementById(modalID).className += " is-active";
+    } else {
+        document.getElementById(modalID).className = "modal";
+    }
+};
 
 //Deleting networks from firestore
 export const handleDeleteButton = function (user, network) {
@@ -137,15 +214,17 @@ export const handleSaveButton = function (event, user, network) {
 };
 
 //Submitting new network
-export const handleSubmitButton = function (event, user) {
+export const handleSubmitButton = async function (event, user) {
     event.preventDefault();
     event.stopPropagation();
+
+    //(act, hidLay, nodesPerLay, iter, lrnRat, DATA, numRows, inputColNames, outputColName) {
 
     const form = $("#network-form");
     const title = form[0]['title'].value;
     const description = form[0]['description'].value;
     let networkCounter = 0;
-
+  
     //updating network count
     db.collection('public').doc('allNetworks').get().then(doc => {
         networkCounter = doc.data().networkCount;
@@ -155,9 +234,9 @@ export const handleSubmitButton = function (event, user) {
             networkCount: networkCounter,
         });
     });
-
-    //updating user network database
-    db.collection('users').doc(user.uid).collection('networks').add({
+  
+   //updating user network database
+     db.collection('users').doc(user.uid).collection('networks').add({
         title: title,
         description: description
     }).then(() => {
@@ -165,6 +244,16 @@ export const handleSubmitButton = function (event, user) {
     }).catch(err => {
         alert(err.message);
     });
+
+    const activationFunction = $('#atv_input')[0].value;
+    const hiddenLayers = $('#hid_input')[0].value;
+    const nodesPerLayer = $('#npl_input')[0].value;
+    const iterations = $('#epc_input')[0].value;
+    const learningRate = $('#lrn_input')[0].value;
+
+    console.log([activationFunction, parseFloat(hiddenLayers), parseFloat(nodesPerLayer), parseFloat(iterations), parseFloat(learningRate), DATA, DATA.length, columns, pdict]);
+    let a = await buildANetwork(activationFunction, hiddenLayers, nodesPerLayer, iterations, learningRate, DATA, DATA.length, columns, pdict);
+    console.log(a)
 };
 
 //Clearing form
@@ -175,11 +264,9 @@ export const handleClearButton = function (event) {
     const form = $("#network-form");
     form[0]['title'].value = "";
     document.getElementById("description").value = "";
-
 };
 
 //Loading content into DOM
-
 export const renderCreateNetworksArea = function () {
 
     return `    
@@ -188,21 +275,19 @@ export const renderCreateNetworksArea = function () {
             </div>
         <div class="column">
             <div class="box">
-                <form id="network-form">
-                    
+                <form id="network-form">                    
                     <div class="field">
                         <label class="label">Title</label>
                         <div class="control">
                             <input id="title" class="input" type="text" placeholder="Enter title for your network" required/>
                         </div>
                     </div>
-
                     <div class="field">
                         <label class="label" id="lrn_label" >Learning Rate</label>
                         <div class="control">
                             <div class="select">
                                 <div class="control">
-                                    <input class="input" type="number" step=".01" min="0" max="1" placeholder=".05" required/>
+                                    <input id="lrn_input" class="input" type="number" step=".01" min="0" max="1" placeholder=".05" required/>
                                 </div>
                             </div>
                         </div>
@@ -225,7 +310,7 @@ export const renderCreateNetworksArea = function () {
                     <div class="field">
                         <label class="label" id="epc_label">Epocs</label>
                         <div class="control">
-                            <input class="input" type="number" placeholder="30" required/>
+                            <input id="epc_input" class="input" type="number" placeholder="30" required/>
                         </div>
                     </div>                
                     <div id="#epc_modal" class="modal">
@@ -246,7 +331,7 @@ export const renderCreateNetworksArea = function () {
                     <div class="field">
                         <label class="label" id="hid_label">Hidden Layers</label>
                         <div class="control">
-                            <input class="input" type="number" placeholder="4" required/>
+                            <input id="hid_input" class="input" type="number" placeholder="4" required/>
                         </div>
                     </div>                
                     <div id="#hid_modal" class="modal">
@@ -262,11 +347,10 @@ export const renderCreateNetworksArea = function () {
                             </div>
                         </section>
                         </div>
-
                     </div><div class="field">
                         <label class="label" id="npl_label">Nodes Per Layer</label>
                         <div class="control">
-                            <input class="input" type="number" placeholder="4" required/>
+                            <input id="npl_input" class="input" type="number" placeholder="4" required/>
                         </div>
                     </div>                
                     <div id="#npl_modal" class="modal">
@@ -288,7 +372,7 @@ export const renderCreateNetworksArea = function () {
                         <label class="label" id="atv_label" >Activation Function</label>
                         <div class="control">
                             <div class="select">
-                                <select id="activation_function">
+                                <select id="atv_input">
                                     <option>Sigmoid</option>
                                     <option>Tanh</option>
                                     <option>Relu</option>
@@ -413,8 +497,41 @@ export const renderCreateNetworksArea = function () {
     `;
 };
 
+export const renderNetworkInputBox = function(rows, perdict) {
+    
+    let result = `<div class="columns is-mobile is-centered is-vcentered">`;
+
+    let i = 0
+
+    rows.forEach(elem => {
+        result += (`
+        <div class="column">
+            <span>"${elem}"</span> 
+        </div>
+        `);
+        i++;
+    });
+    
+    result += (`
+    </div>
+    <div class="columns is-mobile is-centered is-vcentered">
+    `);
+    
+    for (i; i>0; i--){
+        result += (`
+        <div class="column">
+            <input id=${"box"+i} class="input" type="number">
+        </div>
+        `);
+    };
+
+    return result += (`</div>`);
+}
+
 export const renderNetworksArea = function (network) {
     //console.log(network.id);    
+    let rows = ["Bro's per convo", "Polo Shirts Owned", "Drinks Per Week"];
+    let perdict = "Is frat bro?"
 
     return `    
         <div class="column is-full">
@@ -434,8 +551,22 @@ export const renderNetworksArea = function (network) {
                         <div class="content">
                             <i> ${network.data().description} </i>
                             <br>
+                            ${renderNetworkInputBox(rows, perdict)}
                         </div>
+                        <div class="columns is-mobile is-centered is-vcentered">
+                            <div class="column">
+                                <button class="button">
+                                    Train
+                                </button>
+                            </div>
+                            <div class="column">
+                                <div class="box">
+                                    <span>${perdict+'?'}</span> 
+                                    <span id="result_ + ${network.id}">(train for result)</span>
+                                </div>
+                            </div>
                     </div>
+                    
                     <footer class="card-footer">
                         <a href="#" id="editNetwork" data-id="${network.id}" class="card-footer-item modal-trigger" data-target="modal-edit">Edit</a>
                         <a href="#" id="deleteNetwork" data-id="${network.id}" class="card-footer-item">Delete</a>
