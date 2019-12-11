@@ -1,35 +1,10 @@
-import { buildANetwork, useNet } from "./ml.js";
+import { buildANetwork, netFromJson } from "./ml.js";
 
 let $editForm;
 let pdict = "";
 let columns = [];
 let DATA = []
-
-var createArray = function(data) {	
-    if(data !== null && data !== "" && data.length > 1) {
-        this.data = data;
-        StatsProcessor(data);
-        $("#statOutPut").removeClass( "hidden" );			
-        $("#errorOutPut").addClass( "hidden" );			
-    } else {
-        $("#errorOutPut").removeClass( "hidden" );
-        $("#statOutPut").addClass( "hidden" );
-        $("#errorOutPut li").html('There is no data to import');	
-    }	
-};
-
-var createArray = function (data) {
-    if (data !== null && data !== "" && data.length > 1) {
-        this.data = data;
-        StatsProcessor(data);
-        $("#statOutPut").removeClass("hidden");
-        $("#errorOutPut").addClass("hidden");
-    } else {
-        $("#errorOutPut").removeClass("hidden");
-        $("#statOutPut").addClass("hidden");
-        $("#errorOutPut li").html('There is no data to import');
-    }
-};
+let myNets = {};
 
 export const workPlaceRender = function (user) {
     let modals;
@@ -52,7 +27,7 @@ export const workPlaceRender = function (user) {
         // Edit
         $box.on("click", "#editNetwork", () => {
             networkId = $(event.target);
-        });
+        });       
 
         // Delete
         $box.on("click", "#deleteNetwork", () => {
@@ -74,7 +49,6 @@ export const workPlaceRender = function (user) {
     const $clear = $("#clear");
     $clear.click(() => handleClearButton(event));
 
-
     // what is an epoc?
     $("#epc_label").click(() => toggleModal(event, '#epc_modal', true));
     // what are hidden layers?
@@ -85,7 +59,6 @@ export const workPlaceRender = function (user) {
     $("#lrn_label").click(() => toggleModal(event, '#lrn_modal', true));
     // what is nodes per layer?
     $("#npl_label").click(() => toggleModal(event, '#npl_modal', true));
-
     $("#format_label").click(() => toggleModal(event, '#format_modal', true));
 
     // delete em
@@ -94,36 +67,12 @@ export const workPlaceRender = function (user) {
     $("#del_atv_modal").click(() => toggleModal(event, '#atv_modal', false));
     $("#del_lrn_modal").click(() => toggleModal(event, '#lrn_modal', false));
     $("#del_npl_modal").click(() => toggleModal(event, '#npl_modal', false));
+    $("#del_format_modal").click(() => toggleModal(event, '#format_modal', false));    
 
-    $("#del_format_modal").click(() => toggleModal(event, '#format_modal', false));
-
-    $("#network-form").on('change', '#csv', () => {
-        //var csv = require('./jquery.csv.js');
-        var file = event.target.files[0];
-        var reader = new FileReader();
-        reader.readAsText(file);
-        reader.onload = function (event) {
-            //Jquery.csv
-            createArray($.csv.toArrays(event.target.result));
-        };
-        console.log("Here")
-        console.log(file)
-    });
-
-}
-
-// toggle a modal
-export const toggleModal = function (event, modalID, turnOn) {
-    event.preventDefault;
-    if (turnOn) {
-        document.getElementById(modalID).className += " is-active";
-    } else {
-        document.getElementById(modalID).className = "modal";
-    }
-}
-    
     $("#network-form").on('change', '#csv', () => {
         let file = event.target.files[0];
+        let $name = $(".file-name");
+        $name.html(file.name);
 
         Papa.parse(file, {
             dynamicTyping: true,
@@ -137,39 +86,27 @@ export const toggleModal = function (event, modalID, turnOn) {
                 file.shift(0);
 
                 DATA = []
-
+                
                 file.forEach(arr => {
                     let temp = {
                         input: [],
                         output: []
                     }
-                    temp.output = [].push(arr[0]);
+                    
+                    temp.output = [arr[0]];
                     for (let i = 1; i < arr.length; i++) {
                         temp.input.push(arr[i]);
                     }
                     DATA.push(temp)
                 });
-
-                console.log("pdict:")
-                console.log(pdict)
-
-                console.log("columns:")
-                console.log(columns)
-
-                console.log("data:")
-                console.log(DATA)
             }
         })
        
-        /*
-
-        console.log(pdict)
-        console.log(columns)
-        console.log("Here")
-        
-        */
     });
-    
+  
+    $networks.on("click", ".trainButton", () => {
+        trainNetwork(event, user);
+    });
 }
 
 // toggle a modal
@@ -180,14 +117,28 @@ export const toggleModal = function (event, modalID, turnOn) {
     } else {
         document.getElementById(modalID).className = "modal";
     }
-};
+}
+
+export const trainNetwork = function(event, user){
+    let myID = event.target.id;
+    let myData = myNets[myID +""];
+    let myBoxes = [];
+    let $myForm = $('#edit-form-'+myID)[0];
+    for (let i = 1; i <= myData.columns.length; i++) {
+        myBoxes.push(parseFloat($myForm['box'+i+":"+myID].value));
+    }
+    myBoxes = myBoxes.reverse()
+    let network = (netFromJson(myData.net))
+    let result = network.run(myBoxes);
+    db.collection('users').doc(user.uid).collection('networks').doc(myID).update({
+        currentOutput: Math.round(result),
+    });
+}
 
 //Deleting networks from firestore
 export const handleDeleteButton = function (user, network) {
     event.preventDefault();
     const networkId = network[0].getAttribute('data-id');
-
-    //updating user network database
     db.collection('users').doc(user.uid).collection('networks').doc(networkId).delete();
 };
 
@@ -214,7 +165,7 @@ export const handleSaveButton = function (event, user, network) {
 };
 
 //Submitting new network
-export const handleSubmitButton = async function (event, user) {
+export const handleSubmitButton = function (event, user) {
     event.preventDefault();
     event.stopPropagation();
 
@@ -223,27 +174,6 @@ export const handleSubmitButton = async function (event, user) {
     const form = $("#network-form");
     const title = form[0]['title'].value;
     const description = form[0]['description'].value;
-    let networkCounter = 0;
-  
-    //updating network count
-    db.collection('public').doc('allNetworks').get().then(doc => {
-        networkCounter = doc.data().networkCount;
-        networkCounter++;
-    }).then(() => {
-        db.collection('public').doc('allNetworks').update({
-            networkCount: networkCounter,
-        });
-    });
-  
-   //updating user network database
-     db.collection('users').doc(user.uid).collection('networks').add({
-        title: title,
-        description: description
-    }).then(() => {
-        handleClearButton();
-    }).catch(err => {
-        alert(err.message);
-    });
 
     const activationFunction = $('#atv_input')[0].value;
     const hiddenLayers = $('#hid_input')[0].value;
@@ -251,9 +181,23 @@ export const handleSubmitButton = async function (event, user) {
     const iterations = $('#epc_input')[0].value;
     const learningRate = $('#lrn_input')[0].value;
 
-    console.log([activationFunction, parseFloat(hiddenLayers), parseFloat(nodesPerLayer), parseFloat(iterations), parseFloat(learningRate), DATA, DATA.length, columns, pdict]);
-    let a = await buildANetwork(activationFunction, hiddenLayers, nodesPerLayer, iterations, learningRate, DATA, DATA.length, columns, pdict);
-    console.log(a)
+    //console.log([activationFunction, parseFloat(hiddenLayers), parseFloat(nodesPerLayer), parseFloat(iterations), parseFloat(learningRate), DATA, DATA.length, columns, pdict]);
+    let myNetObj = buildANetwork(activationFunction, hiddenLayers, nodesPerLayer, iterations, learningRate, DATA, DATA.length, columns, pdict);
+   // console.log(myNetObj)
+    
+    db.collection('users').doc(user.uid).collection('networks').add({
+        title: title,
+        description: description,
+        net: myNetObj.net.toJSON(),
+        acc: myNetObj.acc,
+        columns: columns,
+        pdict: pdict,
+        currentOutput: "(train for result)"
+    }).then(() => {
+        handleClearButton();
+    }).catch(err => {
+        alert(err.message);
+    });
 };
 
 //Clearing form
@@ -264,6 +208,7 @@ export const handleClearButton = function (event) {
     const form = $("#network-form");
     form[0]['title'].value = "";
     document.getElementById("description").value = "";
+    
 };
 
 //Loading content into DOM
@@ -275,19 +220,21 @@ export const renderCreateNetworksArea = function () {
             </div>
         <div class="column">
             <div class="box">
-                <form id="network-form">                    
+                <form id="network-form">
+                    
                     <div class="field">
                         <label class="label">Title</label>
                         <div class="control">
                             <input id="title" class="input" type="text" placeholder="Enter title for your network" required/>
                         </div>
                     </div>
+
                     <div class="field">
-                        <label class="label" id="lrn_label" >Learning Rate</label>
+                        <a label class="label" id="lrn_label" >Learning Rate</label>
                         <div class="control">
-                            <div class="select">
+                            <div>
                                 <div class="control">
-                                    <input id="lrn_input" class="input" type="number" step=".01" min="0" max="1" placeholder=".05" required/>
+                                    <input id="lrn_input" class="input" type="number" step=".01" min="0" max="1" placeholder=".5" required/>
                                 </div>
                             </div>
                         </div>
@@ -308,9 +255,9 @@ export const renderCreateNetworksArea = function () {
                     </div>
 
                     <div class="field">
-                        <label class="label" id="epc_label">Epocs</label>
+                        <a label class="label" id="epc_label">Epocs</label>
                         <div class="control">
-                            <input id="epc_input" class="input" type="number" placeholder="30" required/>
+                            <input id="epc_input" class="input" type="number" placeholder="300" required/>
                         </div>
                     </div>                
                     <div id="#epc_modal" class="modal">
@@ -329,7 +276,7 @@ export const renderCreateNetworksArea = function () {
                     </div>
 
                     <div class="field">
-                        <label class="label" id="hid_label">Hidden Layers</label>
+                        <a label class="label" id="hid_label">Hidden Layers</label>
                         <div class="control">
                             <input id="hid_input" class="input" type="number" placeholder="4" required/>
                         </div>
@@ -347,8 +294,9 @@ export const renderCreateNetworksArea = function () {
                             </div>
                         </section>
                         </div>
+
                     </div><div class="field">
-                        <label class="label" id="npl_label">Nodes Per Layer</label>
+                        <a label class="label" id="npl_label">Nodes Per Layer</label>
                         <div class="control">
                             <input id="npl_input" class="input" type="number" placeholder="4" required/>
                         </div>
@@ -369,7 +317,7 @@ export const renderCreateNetworksArea = function () {
                     </div>
 
                     <div class="field">
-                        <label class="label" id="atv_label" >Activation Function</label>
+                        <a label class="label" id="atv_label" >Activation Function</label>
                         <div class="control">
                             <div class="select">
                                 <select id="atv_input">
@@ -422,7 +370,7 @@ export const renderCreateNetworksArea = function () {
                     </div>
 
                     <div class="field">
-                        <label id="format_label" class="label" style="color:skyblue;">How Should I Format My Data?</label>
+                        <a label id="format_label" class="label">How Should I Format My Data?</label>
                     </div>
                     <div id="#format_modal" class="modal">
                         <div class="modal-background"></div>
@@ -456,7 +404,8 @@ export const renderCreateNetworksArea = function () {
                                         Choose a file…
                                     </span>
                                 </span>
-                                
+                                <span class="file-name">
+                                </span>                                
                         </label>
                     </div>
           
@@ -497,13 +446,13 @@ export const renderCreateNetworksArea = function () {
     `;
 };
 
-export const renderNetworkInputBox = function(rows, perdict) {
+export const renderNetworkInputBox = function(columns, id) {
     
     let result = `<div class="columns is-mobile is-centered is-vcentered">`;
 
     let i = 0
 
-    rows.forEach(elem => {
+    columns.forEach(elem => {
         result += (`
         <div class="column">
             <span>"${elem}"</span> 
@@ -520,7 +469,7 @@ export const renderNetworkInputBox = function(rows, perdict) {
     for (i; i>0; i--){
         result += (`
         <div class="column">
-            <input id=${"box"+i} class="input" type="number">
+            <input id=${"box"+i+":"+id} class="input" type="number">
         </div>
         `);
     };
@@ -529,18 +478,22 @@ export const renderNetworkInputBox = function(rows, perdict) {
 }
 
 export const renderNetworksArea = function (network) {
-    //console.log(network.id);    
-    let rows = ["Bro's per convo", "Polo Shirts Owned", "Drinks Per Week"];
-    let perdict = "Is frat bro?"
 
-    return `    
+
+    myNets[network.id] = network.data();
+    //console.log(myNets)
+
+    //console.log(network.data())
+    //console.log(netFromJson(network.data().net))
+
+    let result = `    
         <div class="column is-full">
             <div class="box">
-                <div class="card" style="width: 400px">
+                <div class="card">
                     <header class="card-header">
                         <p class="card-header-title">
                             ${network.data().title}
-                        </p>
+                        </p>                        
                         <a href="#" class="card-header-icon" aria-label="more options">
                             <span class="icon">
                                 <i class="fas fa-angle-down" aria-hidden="true"></i>
@@ -549,20 +502,30 @@ export const renderNetworksArea = function (network) {
                     </header>
                     <div class="card-content">
                         <div class="content">
-                            <i> ${network.data().description} </i>
+                            <form id="edit-form-${network.id}">
+                            <div>
+                            <p><strong><i> ${network.data().description} </i></strong></p>
+                            </div> 
                             <br>
-                            ${renderNetworkInputBox(rows, perdict)}
+                            <br>  
+                            ${renderNetworkInputBox(network.data().columns, network.id)}
+                            </form>   
                         </div>
                         <div class="columns is-mobile is-centered is-vcentered">
                             <div class="column">
-                                <button class="button">
+                                <button id="${network.id}" class="trainButton button is-link"">
                                     Train
                                 </button>
                             </div>
                             <div class="column">
                                 <div class="box">
-                                    <span>${perdict+'?'}</span> 
-                                    <span id="result_ + ${network.id}">(train for result)</span>
+                                    <span>${network.data().pdict+'?'}</span> 
+                                    <span id="resultBox:${network.id}">${network.data().currentOutput}</span>
+                                </div>
+                            </div>
+                            <div class="column">
+                                <div class="box">
+                                    <span>${'Network is '+network.data().acc*100+'% accurate!'}</span> 
                                 </div>
                             </div>
                     </div>
@@ -595,56 +558,82 @@ export const renderNetworksArea = function (network) {
             </div>
         </div>
     `;
+    return result;
 };
 
-//Calculating number of networks
-export const numberOfNetworksFunction = async function () {
-    let result = await db.collection('public').doc('allNetworks').get().then((doc) => {
-        numberOfNetworks = doc.data().networkCount;
-    });
-    //updating number of networks
-    db.collection('public').doc('allNetworks').onSnapshot(doc => {
-        numberOfNetworks = doc.data().networkCount;
-    });
-};
-
-export const workPlaceNavBar = function () {
-
+export const renderUncompleteNetwork = function(network) {
     return `    
-    <!-- NAVBAR -->
-    <nav class=" z-depth-0 white lighten-4" id="navBar">
-        <div class="nav-wrapper container">
-            <a href="#" class="brand-logo">
-                <img src="img/logo.png" style="width: 50px; height: 50px; margin-top: 5px;">
-            </a>
-            <ul id="nav-mobile" class="right hide-on-med-and-down">
-                <li class="logged-in">
-                    <a href="#" id="homePage" class="grey-text">Home</a>
-                </li>                
-                <li class="logged-in">
-                    <a href="#" class="grey-text modal-trigger" data-target="modal-account">Account</a>
-                </li>
-                <li class="logged-in">
-                    <a href="#" id="workPlace" class="grey-text">Work Place</a>
-                </li>
-                <li class="logged-in">
-                    <a href="#" id="contactPage" class="grey-text">Contact Us</a>
-                </li>
-                <li class="logged-in">
-                    <a href="#" class="grey-text" id="logout">Logout</a>
-                </li>
-            </ul>            
+        <div class="column is-full">
+            <div class="box">
+                <div class="card" style="width: 400px">
+                    <header class="card-header">
+                        <p class="card-header-title">
+                            ${network.data().title}
+                        </p>
+                        <a href="#" class="card-header-icon" aria-label="more options">
+                            <span class="icon">
+                                <i class="fas fa-angle-down" aria-hidden="true"></i>
+                            </span>
+                        </a>
+                    </header>
+                    <div class="card-content">
+                        <div class="content">
+                            <i> ${network.data().description} </i>
+                            <br>
+                            
+                        </div>
+                        <div class="columns is-mobile is-centered is-vcentered">
+                            <div class="column">
+                                <button class="button">
+                                    Train
+                                </button>
+                            </div>
+                            <div class="column">
+                                <div class="box">
+                                    <span></span> 
+                                    <span id="result_ + ${network.id}">(train for result)</span>
+                                </div>
+                            </div>
+                            <div class="column">
+                                <div class="box">
+                                    <span>${'Network is % accurate!'}</span> 
+                                </div>
+                            </div>
+                    </div>
+                    
+                    <footer class="card-footer">
+                        <a href="#" id="editNetwork" data-id="${network.id}" class="card-footer-item modal-trigger" data-target="modal-edit">Edit</a>
+                        <a href="#" id="deleteNetwork" data-id="${network.id}" class="card-footer-item">Delete</a>
+                    </footer>
+                </div>
+            </div>
+        </div> 
+        
+        <!-- EDIT MODAL -->
+        <div class="modal" id="modal-edit" >
+            <div class="modal-content">
+                <br>
+                <p class="subtitle is-4">Edit Network</p>
+                <br>
+                <form id="edit-form">                
+                    <div class="input-field">
+                        <input type="text" id="edit-title">
+                        <label for="edit-title">Title</label>
+                    </div>
+                    <div class="input-field">
+                        <input type="text" id="edit-description">
+                        <label for="edit-description">Description</label>
+                    </div>
+                    <button id="saveButton" class="btn yellow darken-2 z-depth-0">Save</button>
+                </form>
+            </div>
         </div>
-    </nav>
+    `;
+}
 
-    <!-- ACCOUNT MODAL -->
-    <div id="modal-account" class="modal">
-        <div class="modal-content center-align">
-            <br>
-            <p class="subtitle is-4">Account Details</p> 
-            <br>           
-            <div class="account-details"></div>
-        </div>
-    </div>
-`;
+//TO DO
+//Calculating number of networks
+export const numberOfNetworks = function (user) {
+    let count = 0;
+    return count;
 };
