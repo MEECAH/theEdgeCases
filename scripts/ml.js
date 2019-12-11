@@ -34,10 +34,7 @@ export const buildANetwork = function (act, hidLay, nodesPerLay, iter, lrnRat, D
     for (let i = hidLay; i > 0; i--) {
         myArr.push(nodesPerLay);
     }
-    //console.log(act)
-    //console.log(myArr)
-    //console.log(iter)
-    //console.log(lrnRat)
+    
     const config = {
         activation: act,  //Sets the function for activation
         hiddenLayers: myArr,  //Sets the number of hidden layers
